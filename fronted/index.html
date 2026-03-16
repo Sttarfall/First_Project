@@ -77,7 +77,31 @@
                 </form>
             </section>
             <!-- Список напоминаний -->
+            <section class="reminders-list">
+                <h3><i class="list"></i> Предстоящие напоминания</h3>
+                <div class="filters">
+                    <button class="filter-btn active">Все</button>
+                    <button class="filter-btn">Сегодня</button>
+                    <button class="filter-btn">Неделя</button>
+                </div>
+                <div id="reminders-container">
+                    <!-- Напоминания будут загружаться здесь -->
+                    <div class="loading">Загрузка напоминаний...</div>
+                </div>
+            </section>
         </main>
     </div>
+    <!-- Уведомления -->
+    <div id="notification" class="notification hidden">
+        <div class="notification-content">
+            <i class="bell"></i>
+            <div>
+                <h4>Новое напоминание!</h4>
+                <p id="notification-text"></p>
+            </div>
+        </div>
+        <button id="close-notification" class="close-btn">times</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
