@@ -5,6 +5,9 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
 from dotenv import load_dotenv
+import json
+from pywebpush import webpush, WebPushException
+
 
 #Загрузка переменных окружения 
 load_dotenv()
@@ -172,6 +175,194 @@ def index():
             'GET /api/stats': 'Статистика'
         }
     })
+
+# Конфигурация для Web Push
+VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY')
+VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY')
+VAPID_CLAIMS = {
+    "sub": "mailto:admin@example.com"
+}
+
+# Таблица для хранения push-подписок
+class PushSubscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    endpoint = db.Column(db.Text, nullable=False)
+    keys = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# API для push-уведомлений
+@app.route('/api/subscribe', methods=['POST'])
+def subscribe():
+    """Сохранение push-подписки"""
+    try:
+        subscription = request.json.get('subscription')
+        
+        # Проверяем, есть ли уже такая подписка
+        existing = PushSubscription.query.filter_by(
+            endpoint=subscription['endpoint']
+        ).first()
+        
+        if not existing:
+            new_sub = PushSubscription(
+                endpoint=subscription['endpoint'],
+                keys=json.dumps(subscription['keys'])
+            )
+            db.session.add(new_sub)
+            db.session.commit()
+        
+        return jsonify({'message': 'Подписка сохранена'}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/send-notification', methods=['POST'])
+def send_notification():
+    """Отправка push-уведомления"""
+    try:
+        data = request.json
+        subscriptions = PushSubscription.query.all()
+        
+        for sub in subscriptions:
+            try:
+                webpush(
+                    subscription_info={
+                        "endpoint": sub.endpoint,
+                        "keys": json.loads(sub.keys)
+                    },
+                    data=json.dumps({
+                        "title": data.get('title', 'Напоминание'),
+                        "body": data.get('body', ''),
+                        "icon": data.get('icon', '/icon.png'),
+                        "url": data.get('url', '/')
+                    }),
+                    vapid_private_key=VAPID_PRIVATE_KEY,
+                    vapid_claims=VAPID_CLAIMS
+                )
+            except WebPushException as e:
+                print(f"Ошибка отправки уведомления: {e}")
+                # Удаляем неработающую подписку
+                db.session.delete(sub)
+        
+        db.session.commit()
+        return jsonify({'message': 'Уведомления отправлены'}), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# API для календаря
+@app.route('/api/reminders/date/<string:date>', methods=['GET'])
+def get_reminders_by_date(date):
+    """Получить напоминания по конкретной дате"""
+    try:
+        reminders = Reminder.query.filter_by(date=datetime.strptime(date, '%Y-%m-%d').date()).all()
+        return jsonify([reminder.to_dict() for reminder in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+@app.route('/api/reminders/range', methods=['GET'])
+def get_reminders_by_range():
+    """Получить напоминания за период"""
+    try:
+        start_date = datetime.strptime(request.args.get('start'), '%Y-%m-%d').date()
+        end_date = datetime.strptime(request.args.get('end'), '%Y-%m-%d').date()
+        
+        reminders = Reminder.query.filter(
+            Reminder.date >= start_date,
+            Reminder.date <= end_date
+        ).all()
+        
+        return jsonify([reminder.to_dict() for reminder in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# API для статистики
+@app.route('/api/stats/detailed', methods=['GET'])
+def get_detailed_stats():
+    """Получить детальную статистику"""
+    try:
+        # Общая статистика
+        total = Reminder.query.count()
+        completed = Reminder.query.filter_by(is_completed=True).count()
+        pending = total - completed
+        
+        # Статистика по приоритетам
+        high_priority = Reminder.query.filter_by(priority='high').count()
+        medium_priority = Reminder.query.filter_by(priority='medium').count()
+        low_priority = Reminder.query.filter_by(priority='low').count()
+        
+        # Напоминания по дням недели
+        day_stats = {}
+        reminders = Reminder.query.all()
+        for reminder in reminders:
+            day_name = reminder.date.strftime('%A')
+            day_stats[day_name] = day_stats.get(day_name, 0) + 1
+        
+        return jsonify({
+            'total': total,
+            'completed': completed,
+            'pending': pending,
+            'completion_rate': (completed / total * 100) if total > 0 else 0,
+            'priority_stats': {
+                'high': high_priority,
+                'medium': medium_priority,
+                'low': low_priority
+            },
+            'day_stats': day_stats
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# Ежечасная проверка напоминаний
+def check_upcoming_reminders():
+    """Проверка напоминаний, которые должны сработать в ближайшее время"""
+    with app.app_context():
+        now = datetime.now()
+        next_hour = now + timedelta(hours=1)
+        
+        reminders = Reminder.query.filter(
+            Reminder.date == now.date(),
+            Reminder.time >= now.time(),
+            Reminder.time <= next_hour.time(),
+            Reminder.is_completed == False
+        ).all()
+        
+        for reminder in reminders:
+            # Отправляем push-уведомление
+            subscriptions = PushSubscription.query.all()
+            for sub in subscriptions:
+                try:
+                    webpush(
+                        subscription_info={
+                            "endpoint": sub.endpoint,
+                            "keys": json.loads(sub.keys)
+                        },
+                        data=json.dumps({
+                            "title": "Скоро напоминание!",
+                            "body": f"\"{reminder.title}\" в {reminder.time.strftime('%H:%M')}",
+                            "icon": "/icon.png",
+                            "url": "/"
+                        }),
+                        vapid_private_key=VAPID_PRIVATE_KEY,
+                        vapid_claims=VAPID_CLAIMS
+                    )
+                except WebPushException:
+                    pass
+            
+            # Также можно добавить отправку email
+            send_email_reminder(reminder)
+
+def send_email_reminder(reminder):
+    """Отправка напоминания по email (заглушка)"""
+    # Здесь можно интегрировать с SMTP сервером
+    # Например, используя smtplib
+    print(f"Email напоминание: {reminder.title} - {reminder.time}")
+
+# Запуск планировщика
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=check_upcoming_reminders, trigger="interval", minutes=30)
+scheduler.start()
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
