@@ -1,6 +1,6 @@
 class PushNotificationManager {
     constructor() {
-        this.publicVapidKey = 'ВАШ_PUBLIC_VAPID_KEY'; // Получить на web-push-codelab.glitch.me
+        this.publicVapidKey = 'BMZmAZDtin2qBMhnAL0ywmr0NxIR_rP1Uiw83GCbfJDe1wYbUBDetDIuEdkUOkVLm5zobH7bQPNBKBGh4Pt8NnI'; 
         this.subscription = null;
         this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
     }
