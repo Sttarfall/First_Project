@@ -1,6 +1,6 @@
 class PushNotificationManager {
     constructor() {
-        this.publicVapidKey = 'BMZmAZDtin2qBMhnAL0ywmr0NxIR_rP1Uiw83GCbfJDe1wYbUBDetDIuEdkUOkVLm5zobH7bQPNBKBGh4Pt8NnI'; 
+        this.publicVapidKey = 'VAPID_PUBLIC_KEY'; 
         this.subscription = null;
         this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
     }
