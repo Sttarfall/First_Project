@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь | Тихий Напоминатель</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="calendar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <!-- Та же боковая панель, что и в index.html -->
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h2>Календарь напоминаний</h2>
+                <div class="calendar-controls">
+                    <button id="prev-month"><i class="chevron-left"></i></button>
+                    <h3 id="current-month">Январь 2024</h3>
+                    <button id="next-month"><i class="chevron-right"></i></button>
+                    <button id="today-btn">Сегодня</button>
+                </div>
+            </header>
+
+            <div class="calendar-view">
+                <!-- Переключение между видами -->
+                <div class="view-switcher">
+                    <button class="view-btn active" data-view="month">Месяц</button>
+                    <button class="view-btn" data-view="week">Неделя</button>
+                    <button class="view-btn" data-view="day">День</button>
+                </div>
+
+                <!-- Календарь -->
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <div class="day-header">Пн</div>
+                        <div class="day-header">Вт</div>
+                        <div class="day-header">Ср</div>
+                        <div class="day-header">Чт</div>
+                        <div class="day-header">Пт</div>
+                        <div class="day-header">Сб</div>
+                        <div class="day-header">Вс</div>
+                    </div>
+                    <div class="calendar-body" id="calendar-days">
+                        <!-- Дни календаря будут генерироваться через JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Список напоминаний для выбранного дня -->
+            <section class="day-reminders">
+                <h3 id="selected-date">Сегодня</h3>
+                <div id="day-reminders-list">
+                    <!-- Напоминания для выбранного дня -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="calendar.js"></script>
+</body>
+</html>
