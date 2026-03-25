@@ -276,27 +276,6 @@ def get_detailed_stats():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/reminders/range', methods=['GET'])
-def get_reminders_by_range():
-    """Получить напоминания за период"""
-    try:
-        start_date = request.args.get('start')
-        end_date = request.args.get('end')
-        
-        if not start_date or not end_date:
-            return jsonify({'error': 'Не указаны даты периода'}), 400
-        
-        reminders = Reminder.query.filter(
-            Reminder.date >= start_date,
-            Reminder.date <= end_date,
-            Reminder.is_completed == False
-        ).order_by(Reminder.date, Reminder.time).all()
-        
-        return jsonify([reminder.to_dict() for reminder in reminders])
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 @app.route('/api/reminders/today', methods=['GET'])
 def get_today_reminders():
     """Получить напоминания на сегодня"""
