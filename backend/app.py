@@ -277,11 +277,13 @@ def get_detailed_stats():
 
 if __name__ == '__main__':
     print("=" * 50)
-    print("Запуск сервера 'Тихий Напоминатель'")
+    print("Сервер запущен: http://localhost:5000")
+    print("Доступные эндпоинты:")
+    print("  GET  /api/reminders")
+    print("  POST /api/reminders")
+    print("  GET  /api/reminders/today")
+    print("  GET  /api/stats")
+    print("  GET  /api/stats/detailed")  # <-- Этот нужен для статистики
+    print("  GET  /api/health")
     print("=" * 50)
-    print(f"Frontend доступен по адресу: http://localhost:5000")
-    print(f"API доступен по адресу: http://localhost:5000/api/reminders")
-    print(f"База данных: reminders.db")
-    print("=" * 50)
-    
     app.run(debug=True, port=5000)
