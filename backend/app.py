@@ -275,21 +275,6 @@ def get_detailed_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@app.route('/api/reminders/today', methods=['GET'])
-def get_today_reminders():
-    """Получить напоминания на сегодня"""
-    try:
-        today = datetime.now().strftime('%Y-%m-%d')
-        reminders = Reminder.query.filter_by(
-            date=today, 
-            is_completed=False
-        ).order_by(Reminder.time).all()
-        
-        return jsonify([reminder.to_dict() for reminder in reminders])
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     print("=" * 50)
     print("Запуск сервера 'Тихий Напоминатель'")
