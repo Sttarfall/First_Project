@@ -217,6 +217,100 @@ def not_found(error):
 def server_error(error):
     return jsonify({'error': 'Внутренняя ошибка сервера'}), 500
 
+@app.route('/api/stats/detailed', methods=['GET'])
+def get_detailed_stats():
+    """Получить детальную статистику"""
+    try:
+        # Общая статистика
+        total = Reminder.query.count()
+        completed = Reminder.query.filter_by(is_completed=True).count()
+        pending = total - completed
+        
+        # Статистика по приоритетам
+        high_priority = Reminder.query.filter_by(priority='high').count()
+        medium_priority = Reminder.query.filter_by(priority='medium').count()
+        low_priority = Reminder.query.filter_by(priority='low').count()
+        
+        # Напоминания по дням недели
+        day_stats = {}
+        reminders = Reminder.query.all()
+        
+        # Дни недели на русском
+        days_ru = {
+            0: 'Понедельник',
+            1: 'Вторник', 
+            2: 'Среда',
+            3: 'Четверг',
+            4: 'Пятница',
+            5: 'Суббота',
+            6: 'Воскресенье'
+        }
+        
+        for reminder in reminders:
+            if reminder.date:
+                # Преобразуем строку даты в объект datetime
+                from datetime import datetime
+                date_obj = datetime.strptime(reminder.date, '%Y-%m-%d')
+                # Получаем день недели (0 = понедельник в Python)
+                weekday = date_obj.weekday()
+                day_name = days_ru[weekday]
+                day_stats[day_name] = day_stats.get(day_name, 0) + 1
+        
+        # Процент выполнения
+        completion_rate = (completed / total * 100) if total > 0 else 0
+        
+        return jsonify({
+            'total': total,
+            'completed': completed,
+            'pending': pending,
+            'completion_rate': completion_rate,
+            'priority_stats': {
+                'high': high_priority,
+                'medium': medium_priority,
+                'low': low_priority
+            },
+            'day_stats': day_stats
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/reminders/range', methods=['GET'])
+def get_reminders_by_range():
+    """Получить напоминания за период"""
+    try:
+        start_date = request.args.get('start')
+        end_date = request.args.get('end')
+        
+        if not start_date or not end_date:
+            return jsonify({'error': 'Не указаны даты периода'}), 400
+        
+        reminders = Reminder.query.filter(
+            Reminder.date >= start_date,
+            Reminder.date <= end_date,
+            Reminder.is_completed == False
+        ).order_by(Reminder.date, Reminder.time).all()
+        
+        return jsonify([reminder.to_dict() for reminder in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/reminders/today', methods=['GET'])
+def get_today_reminders():
+    """Получить напоминания на сегодня"""
+    try:
+        today = datetime.now().strftime('%Y-%m-%d')
+        reminders = Reminder.query.filter_by(
+            date=today, 
+            is_completed=False
+        ).order_by(Reminder.time).all()
+        
+        return jsonify([reminder.to_dict() for reminder in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     print("=" * 50)
     print("Запуск сервера 'Тихий Напоминатель'")
