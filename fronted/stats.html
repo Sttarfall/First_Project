@@ -12,101 +12,53 @@
 <body>
     <div class="container">
         <aside class="sidebar">
-            <!-- Боковая панель -->
+            <div class="logo">
+                <i class="fas fa-bell"></i>
+                <h1>Тихий Напоминатель</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                <a href="calendar.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Календарь</a>
+                <a href="stats.html" class="nav-link active"><i class="fas fa-chart-line"></i> Статистика</a>
+                <a href="settings.html" class="nav-link"><i class="fas fa-cog"></i> Настройки</a>
+            </nav>
         </aside>
 
         <main class="main-content">
             <header class="header">
-                <h2>Статистика продуктивности</h2>
-                <div class="time-filter">
-                    <select id="time-period">
-                        <option value="week">Неделя</option>
-                        <option value="month" selected>Месяц</option>
-                        <option value="year">Год</option>
-                        <option value="all">Все время</option>
-                    </select>
-                </div>
+                <h2><i class="fas fa-chart-line"></i> Статистика</h2>
+                <button class="btn-notifications" id="refresh-stats">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
             </header>
 
-            <!-- Карточки статистики -->
             <div class="stats-cards">
                 <div class="stats-card">
-                    <div class="stats-icon" style="background-color: rgba(46, 139, 87, 0.1);">
-                        <i class="fas fa-tasks" style="color: var(--primary-green);"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3 id="total-count">0</h3>
-                        <p>Всего напоминаний</p>
-                    </div>
+                    <h3 id="total-count">0</h3>
+                    <p>Всего напоминаний</p>
                 </div>
-
                 <div class="stats-card">
-                    <div class="stats-icon" style="background-color: rgba(106, 90, 205, 0.1);">
-                        <i class="fas fa-check-circle" style="color: var(--complementary);"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3 id="completed-count">0</h3>
-                        <p>Выполнено</p>
-                    </div>
+                    <h3 id="completed-count">0</h3>
+                    <p>Выполнено</p>
                 </div>
-
                 <div class="stats-card">
-                    <div class="stats-icon" style="background-color: rgba(52, 152, 219, 0.1);">
-                        <i class="fas fa-chart-line" style="color: #3498db;"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3 id="completion-rate">0%</h3>
-                        <p>Процент выполнения</p>
-                    </div>
+                    <h3 id="completion-rate">0%</h3>
+                    <p>Процент выполнения</p>
                 </div>
-
                 <div class="stats-card">
-                    <div class="stats-icon" style="background-color: rgba(231, 76, 60, 0.1);">
-                        <i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i>
-                    </div>
-                    <div class="stats-info">
-                        <h3 id="high-priority-count">0</h3>
-                        <p>Высокий приоритет</p>
-                    </div>
+                    <h3 id="high-priority-count">0</h3>
+                    <p>Высокий приоритет</p>
                 </div>
             </div>
 
-            <!-- Графики -->
             <div class="charts-container">
                 <div class="chart-box">
-                    <h3>Распределение по приоритетам</h3>
+                    <h3><i class="fas fa-chart-pie"></i> Распределение по приоритетам</h3>
                     <canvas id="priorityChart"></canvas>
                 </div>
-
                 <div class="chart-box">
-                    <h3>Активность по дням недели</h3>
+                    <h3><i class="fas fa-calendar-week"></i> Активность по дням недели</h3>
                     <canvas id="weekdayChart"></canvas>
-                </div>
-
-                <div class="chart-box full-width">
-                    <h3>Прогресс выполнения по времени</h3>
-                    <canvas id="timelineChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Подробная статистика -->
-            <div class="detailed-stats">
-                <h3>Детальная статистика</h3>
-                <div class="stats-table">
-                    <table id="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Дата</th>
-                                <th>Создано</th>
-                                <th>Выполнено</th>
-                                <th>Процент</th>
-                                <th>Среднее в день</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Данные будут загружены через JS -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </main>

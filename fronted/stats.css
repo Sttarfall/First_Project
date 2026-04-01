@@ -1,144 +1,164 @@
-.stats-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-.stats-card {
-    background-color: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7f6;
+        }
 
-.stats-card:hover {
-    transform: translateY(-5px);
-}
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
 
-.stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-}
+        /* Боковая панель */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #2E8B57, #1a5d3a);
+            color: white;
+            padding: 2rem 1.5rem;
+        }
 
-.stats-info h3 {
-    font-size: 2rem;
-    margin-bottom: 0.3rem;
-    color: var(--text-dark);
-}
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
 
-.stats-info p {
-    color: var(--text-light);
-    font-size: 0.9rem;
-}
+        .logo i {
+            font-size: 2rem;
+        }
 
-.charts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
+        .logo h1 {
+            font-size: 1.2rem;
+        }
 
-.chart-box {
-    background-color: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
-}
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
-.chart-box h3 {
-    margin-bottom: 1.5rem;
-    color: var(--primary-green);
-    font-size: 1.2rem;
-}
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
 
-.chart-box.full-width {
-    grid-column: 1 / -1;
-}
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
-.time-filter select {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: white;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-}
+        .nav-link.active {
+            background-color: #6a5acd;
+        }
 
-.detailed-stats {
-    background-color: var(--card-bg);
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-}
+        /* Основной контент */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
 
-.detailed-stats h3 {
-    margin-bottom: 1.5rem;
-    color: var(--primary-green);
-}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
 
-.stats-table {
-    overflow-x: auto;
-}
+        .header h2 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+        }
 
-.stats-table table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        .btn-notifications {
+            background-color: #6a5acd;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
 
-.stats-table th {
-    background-color: var(--background);
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text-dark);
-    border-bottom: 2px solid var(--border-color);
-}
+        .btn-notifications:hover {
+            background-color: #5a4acd;
+        }
 
-.stats-table td {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-}
+        /* Карточки статистики */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
 
-.stats-table tr:hover {
-    background-color: var(--background);
-}
+        .stats-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
-.progress-bar {
-    height: 8px;
-    background-color: var(--border-color);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 0.5rem;
-}
+        .stats-card h3 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: #2E8B57;
+        }
 
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-green), var(--light-green));
-    border-radius: 4px;
-}
+        .stats-card p {
+            margin: 0.5rem 0 0;
+            color: #7f8c8d;
+        }
 
-@media (max-width: 768px) {
-    .charts-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+        /* Графики */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+        }
 
-@media (max-width: 480px) {
-    .stats-cards {
-        grid-template-columns: 1fr;
-    }
-}
+        .chart-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-box h3 {
+            margin-bottom: 1.5rem;
+            color: #2E8B57;
+        }
+
+        canvas {
+            max-height: 300px;
+            width: 100% !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
