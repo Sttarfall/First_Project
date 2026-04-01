@@ -411,3 +411,80 @@ body {
         max-width: none;
     }
 }
+
+/* Темная тема */
+body.dark-theme {
+    --background: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-dark: #ffffff;
+    --text-light: #b0b0b0;
+    --border-color: #404040;
+}
+
+body.dark-theme .sidebar {
+    background: linear-gradient(180deg, #1a5d3a, #0d3b23);
+}
+
+body.dark-theme .stats {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .nav-link {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+body.dark-theme .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .create-reminder,
+body.dark-theme .reminders-list,
+body.dark-theme .calendar-container,
+body.dark-theme .day-details,
+body.dark-theme .settings-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+body.dark-theme .form-group input,
+body.dark-theme .form-group select,
+body.dark-theme .form-group textarea {
+    background-color: #3d3d3d;
+    border-color: #555;
+    color: var(--text-dark);
+}
+
+body.dark-theme .reminder-item {
+    background-color: #363636;
+}
+
+body.dark-theme .filter-btn {
+    background-color: #3d3d3d;
+    border-color: #555;
+    color: var(--text-light);
+}
+
+body.dark-theme .filter-btn.active {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+/* Компактный режим */
+body.compact-mode .reminder-item {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+body.compact-mode .form-group {
+    margin-bottom: 0.8rem;
+}
+
+body.compact-mode .calendar-day {
+    min-height: 80px;
+    padding: 4px;
+}
+
+body.compact-mode .setting-item {
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+}

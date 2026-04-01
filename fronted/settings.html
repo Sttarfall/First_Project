@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки | Тихий Напоминатель</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .settings-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .settings-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .settings-section h3 {
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding: 1rem;
+            background-color: var(--background);
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .setting-item:hover {
+            background-color: rgba(46, 139, 87, 0.1);
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Переключатель */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Выбор темы */
+        .theme-selector {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .theme-option {
+            flex: 1;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-option:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .theme-option.selected {
+            border-color: var(--primary-green);
+            background-color: rgba(46, 139, 87, 0.1);
+        }
+
+        .theme-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .theme-light .theme-preview {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+        }
+
+        .theme-dark .theme-preview {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+
+        .theme-auto .theme-preview {
+            background: linear-gradient(135deg, var(--primary-green), #6A5ACD);
+        }
+
+        /* Выбор цвета */
+        .color-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.3s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: var(--text-dark);
+        }
+
+        /* Время уведомлений */
+        .notification-time {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .time-input {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+        }
+
+        /* Кнопки действий */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 139, 87, 0.2);
+        }
+
+        .btn-reset {
+            background-color: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--text-light);
+            color: var(--text-dark);
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        /* Выпадающие списки */
+        select.setting-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        /* Ползунки */
+        .slider-container {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            margin-left: 1rem;
+            font-weight: 600;
+            min-width: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-bell"></i>
+                <h1>Тихий Напоминатель</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="total-reminders">0</span>
+                    <span class="stat-label">Всего напоминаний</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="today-reminders">0</span>
+                    <span class="stat-label">Сегодня</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+                <a href="calendar.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Календарь</a>
+                <a href="settings.html" class="nav-link active"><i class="fas fa-cog"></i> Настройки</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <h2>Настройки приложения</h2>
+                <button class="btn-notifications" onclick="window.location.href='index.html'">
+                    <i class="fas fa-home"></i> На главную
+                </button>
+            </header>
+
+            <div class="settings-container">
+                <!-- Настройки уведомлений -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-bell"></i> Уведомления</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Включить уведомления</div>
+                            <div class="setting-description">Получать напоминания в браузере</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="notifications-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Звук уведомлений</div>
+                            <div class="setting-description">Воспроизводить звук при напоминании</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="sound-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Напоминать заранее</div>
+                            <div class="setting-description">За сколько минут до события</div>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="1" max="60" value="15" class="range-slider" id="reminder-time">
+                            <span class="slider-value" id="reminder-time-value">15 мин</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Время уведомлений</div>
+                            <div class="setting-description">Не беспокоить в это время</div>
+                        </div>
+                        <div class="notification-time">
+                            с <input type="time" class="time-input" id="quiet-time-start" value="22:00">
+                            до <input type="time" class="time-input" id="quiet-time-end" value="08:00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Настройки внешнего вида -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-palette"></i> Внешний вид</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Тема приложения</div>
+                            <div class="setting-description">Выберите цветовую тему</div>
+                        </div>
+                        <div class="theme-selector">
+                            <div class="theme-option theme-light selected" data-theme="light">
+                                <div class="theme-preview">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div>Светлая</div>
+                            </div>
+                            <div class="theme-option theme-dark" data-theme="dark">
+                                <div class="theme-preview">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                                <div>Темная</div>
+                            </div>
+                            <div class="theme-option theme-auto" data-theme="auto">
+                                <div class="theme-preview">
+                                    <i class="fas fa-adjust"></i>
+                                </div>
+                                <div>Авто</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Основной цвет</div>
+                            <div class="setting-description">Цвет акцентов интерфейса</div>
+                        </div>
+                        <div class="color-options">
+                            <div class="color-option selected" style="background-color: #2E8B57;" data-color="2E8B57"></div>
+                            <div class="color-option" style="background-color: #3498DB;" data-color="3498DB"></div>
+                            <div class="color-option" style="background-color: #9B59B6;" data-color="9B59B6"></div>
+                            <div class="color-option" style="background-color: #E74C3C;" data-color="E74C3C"></div>
+                            <div class="color-option" style="background-color: #F39C12;" data-color="F39C12"></div>
+                            <div class="color-option" style="background-color: #1ABC9C;" data-color="1ABC9C"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Размер текста</div>
+                            <div class="setting-description">Увеличить размер текста для удобства</div>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" min="12" max="20" value="16" class="range-slider" id="font-size">
+                            <span class="slider-value" id="font-size-value">16px</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Компактный режим</div>
+                            <div class="setting-description">Уменьшить отступы между элементами</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="compact-mode">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Настройки данных -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-database"></i> Данные</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Автосохранение</div>
+                            <div class="setting-description">Автоматически сохранять изменения</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="autosave" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Период хранения</div>
+                            <div class="setting-description">Хранить выполненные напоминания</div>
+                        </div>
+                        <select class="setting-select" id="retention-period">
+                            <option value="7">7 дней</option>
+                            <option value="30" selected>30 дней</option>
+                            <option value="90">90 дней</option>
+                            <option value="365">1 год</option>
+                            <option value="forever">Всегда</option>
+                        </select>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-save" id="export-data">
+                            <i class="fas fa-download"></i> Экспорт данных
+                        </button>
+                        <button class="btn-reset" id="import-data">
+                            <i class="fas fa-upload"></i> Импорт данных
+                        </button>
+                    </div>
+                </div>
+
+                <!-- О приложении -->
+                <div class="settings-section">
+                    <h3><i class="fas fa-info-circle"></i> О приложении</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Версия</div>
+                            <div class="setting-description">Тихий Напоминатель v1.0.0</div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Разработчик</div>
+                            <div class="setting-description">Сделано с ❤️ для удобства</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-reset" id="clear-cache">
+                            <i class="fas fa-broom"></i> Очистить кэш
+                        </button>
+                        <button class="btn-danger" id="reset-settings">
+                            <i class="fas fa-redo"></i> Сбросить настройки
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="settings-script.js"></script>
+</body>
+</html>
