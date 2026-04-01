@@ -1,70 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статистика | Тихий напоминатель</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="stats.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Статистика | Тихий Напоминатель</title>
+    
+    <!-- Внешние библиотеки -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Наши файлы -->
+    <link rel="stylesheet" href="stats.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
+        <!-- Боковая панель -->
         <aside class="sidebar">
             <div class="logo">
                 <i class="fas fa-bell"></i>
                 <h1>Тихий Напоминатель</h1>
             </div>
             <nav class="nav-menu">
-                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
-                <a href="calendar.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Календарь</a>
-                <a href="stats.html" class="nav-link active"><i class="fas fa-chart-line"></i> Статистика</a>
-                <a href="settings.html" class="nav-link"><i class="fas fa-cog"></i> Настройки</a>
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="calendar.html" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Календарь
+                </a>
+                <a href="stats.html" class="nav-link active">
+                    <i class="fas fa-chart-line"></i> Статистика
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i> Настройки
+                </a>
             </nav>
         </aside>
 
+        <!-- Основной контент -->
         <main class="main-content">
-            <header class="header">
-                <h2><i class="fas fa-chart-line"></i> Статистика</h2>
-                <button class="btn-notifications" id="refresh-stats">
+            <header class="stats-header">
+                <h2>
+                    <i class="fas fa-chart-line"></i> 
+                    Статистика напоминаний
+                </h2>
+                <button class="btn-refresh" id="refreshBtn">
                     <i class="fas fa-sync-alt"></i> Обновить
                 </button>
             </header>
 
-            <div class="stats-cards">
-                <div class="stats-card">
-                    <h3 id="total-count">0</h3>
-                    <p>Всего напоминаний</p>
+            <!-- Карточки статистики -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalCount">0</h3>
+                    <p>
+                        <i class="fas fa-tasks"></i> 
+                        Всего напоминаний
+                    </p>
                 </div>
-                <div class="stats-card">
-                    <h3 id="completed-count">0</h3>
-                    <p>Выполнено</p>
+                <div class="stat-card">
+                    <h3 id="completedCount">0</h3>
+                    <p>
+                        <i class="fas fa-check-circle"></i> 
+                        Выполнено
+                    </p>
                 </div>
-                <div class="stats-card">
-                    <h3 id="completion-rate">0%</h3>
-                    <p>Процент выполнения</p>
+                <div class="stat-card">
+                    <h3 id="completionRate">0%</h3>
+                    <p>
+                        <i class="fas fa-chart-simple"></i> 
+                        Процент выполнения
+                    </p>
                 </div>
-                <div class="stats-card">
-                    <h3 id="high-priority-count">0</h3>
-                    <p>Высокий приоритет</p>
+                <div class="stat-card">
+                    <h3 id="highPriorityCount">0</h3>
+                    <p>
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Высокий приоритет
+                    </p>
                 </div>
             </div>
 
-            <div class="charts-container">
-                <div class="chart-box">
-                    <h3><i class="fas fa-chart-pie"></i> Распределение по приоритетам</h3>
+            <!-- Графики -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>
+                        <i class="fas fa-chart-pie"></i> 
+                        Распределение по приоритетам
+                    </h3>
                     <canvas id="priorityChart"></canvas>
                 </div>
-                <div class="chart-box">
-                    <h3><i class="fas fa-calendar-week"></i> Активность по дням недели</h3>
+                <div class="chart-card">
+                    <h3>
+                        <i class="fas fa-calendar-week"></i> 
+                        Активность по дням недели
+                    </h3>
                     <canvas id="weekdayChart"></canvas>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Подключаем JavaScript -->
     <script src="stats.js"></script>
-    
 </body>
 </html>

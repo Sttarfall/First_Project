@@ -1,164 +1,283 @@
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* stats.css - Стили для страницы статистики */
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7f6;
-        }
+/* Основной контейнер */
+.container {
+    display: flex;
+    min-height: 100vh;
+}
 
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
+/* Боковая панель (если не определена в style.css) */
+.sidebar {
+    width: 260px;
+    background: linear-gradient(135deg, #2E8B57, #1a5d3a);
+    color: white;
+    padding: 2rem 1.5rem;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+}
 
-        /* Боковая панель */
-        .sidebar {
-            width: 250px;
-            background: linear-gradient(180deg, #2E8B57, #1a5d3a);
-            color: white;
-            padding: 2rem 1.5rem;
-        }
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 2rem;
-        }
+.logo i {
+    font-size: 1.8rem;
+}
 
-        .logo i {
-            font-size: 2rem;
-        }
+.logo h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
 
-        .logo h1 {
-            font-size: 1.2rem;
-        }
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+.nav-link {
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+}
 
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.3s ease;
-        }
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
 
-        .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
+.nav-link.active {
+    background: #6a5acd;
+}
 
-        .nav-link.active {
-            background-color: #6a5acd;
-        }
+/* Основной контент */
+.main-content {
+    margin-left: 260px;
+    padding: 2rem;
+    flex: 1;
+    background: #f5f7f6;
+    min-height: 100vh;
+}
 
-        /* Основной контент */
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-        }
+/* Заголовок */
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
+.stats-header h2 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
 
-        .header h2 {
-            font-size: 1.8rem;
-            color: #2c3e50;
-        }
+/* Кнопка обновления */
+.btn-refresh {
+    background: #6a5acd;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
 
-        .btn-notifications {
-            background-color: #6a5acd;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-        }
+.btn-refresh:hover {
+    background: #5a4acd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 90, 205, 0.3);
+}
 
-        .btn-notifications:hover {
-            background-color: #5a4acd;
-        }
+.btn-refresh:active {
+    transform: translateY(0);
+}
 
-        /* Карточки статистики */
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+/* Сетка карточек */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
 
-        .stats-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 16px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
+/* Карточка статистики */
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+    cursor: pointer;
+}
 
-        .stats-card h3 {
-            font-size: 2.5rem;
-            margin: 0;
-            color: #2E8B57;
-        }
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
 
-        .stats-card p {
-            margin: 0.5rem 0 0;
-            color: #7f8c8d;
-        }
+.stat-card h3 {
+    font-size: 2.2rem;
+    color: #2E8B57;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
 
-        /* Графики */
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 2rem;
-        }
+.stat-card p {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin: 0;
+}
 
-        .chart-box {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
+.stat-card p i {
+    margin-right: 5px;
+    color: #2E8B57;
+}
 
-        .chart-box h3 {
-            margin-bottom: 1.5rem;
-            color: #2E8B57;
-        }
+/* Сетка графиков */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 1.5rem;
+}
 
-        canvas {
-            max-height: 300px;
-            width: 100% !important;
-        }
+/* Карточка графика */
+.chart-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+}
 
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #7f8c8d;
-        }
+.chart-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-        }
+.chart-card h3 {
+    margin-bottom: 1.5rem;
+    color: #2E8B57;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+}
+
+.chart-card h3 i {
+    color: #6a5acd;
+}
+
+/* Канвас для графиков */
+canvas {
+    max-height: 300px;
+    width: 100% !important;
+}
+
+/* Состояние загрузки */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card, .chart-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+    
+    .main-content {
+        margin-left: 200px;
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 70px;
+        padding: 1rem 0.5rem;
+    }
+    
+    .sidebar .logo h1,
+    .sidebar .nav-link span {
+        display: none;
+    }
+    
+    .sidebar .nav-link {
+        justify-content: center;
+        padding: 0.8rem;
+    }
+    
+    .sidebar .nav-link i {
+        font-size: 1.3rem;
+        margin: 0;
+    }
+    
+    .main-content {
+        margin-left: 70px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
