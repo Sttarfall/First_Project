@@ -1,17 +1,14 @@
 // index.js - Логика главной страницы
 
-// Конфигурация
 const API_URL = 'http://localhost:5000/api';
-
-// Состояние приложения
 let reminders = [];
 let currentFilter = 'all';
 
-// Инициализация при загрузке страницы
+// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Главная страница загружена');
     
-    // Устанавливаем минимальную дату
+    // Устанавливаем дату по умолчанию
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('date');
     if (dateInput) {
@@ -19,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         dateInput.value = today;
     }
     
-    // Устанавливаем время по умолчанию (следующий час)
+    // Устанавливаем время по умолчанию
     const nextHour = new Date();
     nextHour.setHours(nextHour.getHours() + 1);
     const timeInput = document.getElementById('time');
@@ -36,101 +33,85 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Настройка обработчиков событий
 function setupEventListeners() {
-    // Форма создания напоминания
-    const form = document.getElementById('reminder-form');
+    // Форма создания
+    const form = document.getElementById('reminderForm');
     if (form) {
         form.addEventListener('submit', handleCreateReminder);
     }
     
-    // Кнопка включения уведомлений
-    const notifBtn = document.getElementById('enable-notifications');
+    // Кнопка уведомлений
+    const notifBtn = document.getElementById('enableNotificationsBtn');
     if (notifBtn) {
         notifBtn.addEventListener('click', enableNotifications);
     }
     
-    // Кнопка закрытия уведомления
-    const closeBtn = document.getElementById('close-notification');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            document.getElementById('notification').classList.add('hidden');
+    // Закрытие уведомления
+    const closeToast = document.querySelector('.toast-close');
+    if (closeToast) {
+        closeToast.addEventListener('click', () => {
+            document.getElementById('notificationToast').classList.add('hidden');
         });
     }
     
     // Фильтры
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Обновляем активную кнопку
             document.querySelectorAll('.filter-btn').forEach(b => 
                 b.classList.remove('active')
             );
             e.target.classList.add('active');
-            
-            // Применяем фильтр
             currentFilter = e.target.dataset.filter;
             filterReminders();
         });
     });
-    
-    // Автоматическое обновление каждые 5 минут
-    setInterval(loadReminders, 300000);
 }
 
-// Загрузка напоминаний с сервера
+// Загрузка напоминаний
 async function loadReminders() {
     try {
         const response = await fetch(`${API_URL}/reminders`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Ошибка загрузки');
         
         reminders = await response.json();
         console.log(`Загружено ${reminders.length} напоминаний`);
         
-        updateStats();
+        updateSidebarStats();
         filterReminders();
         
-        // Проверяем сегодняшние напоминания
-        checkTodayReminders();
-        
     } catch (error) {
-        console.error('Ошибка загрузки:', error);
-        showNotification('Ошибка', 'Не удалось загрузить напоминания', 'error');
+        console.error('Ошибка:', error);
+        showToast('Ошибка', 'Не удалось загрузить напоминания', 'error');
     }
 }
 
-// Обновление статистики
-function updateStats() {
+// Обновление статистики в боковой панели
+function updateSidebarStats() {
     const today = new Date().toISOString().split('T')[0];
     const todayCount = reminders.filter(r => r.date === today).length;
     
-    const totalCountElem = document.getElementById('total-reminders');
-    const todayCountElem = document.getElementById('today-reminders');
+    const totalElem = document.getElementById('sidebar-total');
+    const todayElem = document.getElementById('sidebar-today');
     
-    if (totalCountElem) totalCountElem.textContent = reminders.length;
-    if (todayCountElem) todayCountElem.textContent = todayCount;
+    if (totalElem) totalElem.textContent = reminders.length;
+    if (todayElem) todayElem.textContent = todayCount;
 }
 
 // Фильтрация напоминаний
 function filterReminders() {
     let filtered = [...reminders];
+    const today = new Date().toISOString().split('T')[0];
     
     switch (currentFilter) {
         case 'today':
-            const today = new Date().toISOString().split('T')[0];
             filtered = filtered.filter(r => r.date === today);
             break;
         case 'week':
-            const todayDate = new Date();
-            const weekLater = new Date(todayDate);
-            weekLater.setDate(todayDate.getDate() + 7);
+            const weekLater = new Date();
+            weekLater.setDate(weekLater.getDate() + 7);
             filtered = filtered.filter(r => {
-                const reminderDate = new Date(r.date);
-                return reminderDate >= todayDate && reminderDate <= weekLater;
+                const rDate = new Date(r.date);
+                return rDate >= new Date(today) && rDate <= weekLater;
             });
-            break;
-        default:
-            // 'all' - без фильтрации
             break;
     }
     
@@ -138,49 +119,47 @@ function filterReminders() {
 }
 
 // Отображение напоминаний
-function displayReminders(remindersToShow) {
-    const container = document.getElementById('reminders-container');
+function displayReminders(remindersList) {
+    const container = document.getElementById('remindersContainer');
     
     if (!container) return;
     
-    if (remindersToShow.length === 0) {
+    if (remindersList.length === 0) {
         container.innerHTML = `
-            <div class="loading">
-                <i class="fas fa-calendar-check"></i> 
-                Нет напоминаний
+            <div class="loading-state">
+                <i class="fas fa-calendar-check"></i>
+                <p>Нет напоминаний</p>
             </div>
         `;
         return;
     }
     
-    // Сортировка по дате и времени
-    remindersToShow.sort((a, b) => {
+    remindersList.sort((a, b) => {
         const dateA = new Date(`${a.date}T${a.time}`);
         const dateB = new Date(`${b.date}T${b.time}`);
         return dateA - dateB;
     });
     
-    container.innerHTML = remindersToShow.map(reminder => `
-        <div class="reminder-item ${reminder.priority}" data-id="${reminder.id}">
+    container.innerHTML = remindersList.map(reminder => `
+        <div class="reminder-card ${reminder.priority}" data-id="${reminder.id}">
             <div class="reminder-content">
-                <h4>${escapeHtml(reminder.title)}</h4>
-                ${reminder.description ? `<p>${escapeHtml(reminder.description)}</p>` : ''}
-                <div class="reminder-date">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>${formatDate(reminder.date)}</span>
-                    <i class="fas fa-clock"></i>
-                    <span>${reminder.time}</span>
-                    <i class="fas fa-flag"></i>
-                    <span>${getPriorityText(reminder.priority)}</span>
+                <div class="reminder-title">
+                    ${escapeHtml(reminder.title)}
+                    <span style="font-size: 0.7rem; margin-left: 8px;">
+                        ${getPriorityIcon(reminder.priority)}
+                    </span>
+                </div>
+                ${reminder.description ? `<div class="reminder-description">${escapeHtml(reminder.description)}</div>` : ''}
+                <div class="reminder-meta">
+                    <span><i class="fas fa-calendar"></i> ${formatDate(reminder.date)}</span>
+                    <span><i class="fas fa-clock"></i> ${reminder.time}</span>
                 </div>
             </div>
             <div class="reminder-actions">
-                <button class="btn-complete" onclick="completeReminder(${reminder.id})" 
-                        title="Отметить как выполненное">
+                <button class="btn-complete" onclick="completeReminder(${reminder.id})" title="Выполнено">
                     <i class="fas fa-check-circle"></i>
                 </button>
-                <button class="btn-delete" onclick="deleteReminder(${reminder.id})" 
-                        title="Удалить">
+                <button class="btn-delete" onclick="deleteReminder(${reminder.id})" title="Удалить">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
@@ -188,7 +167,7 @@ function displayReminders(remindersToShow) {
     `).join('');
 }
 
-// Создание нового напоминания
+// Создание напоминания
 async function handleCreateReminder(e) {
     e.preventDefault();
     
@@ -201,101 +180,62 @@ async function handleCreateReminder(e) {
     };
     
     if (!reminder.title) {
-        showNotification('Ошибка', 'Введите заголовок напоминания', 'error');
+        showToast('Ошибка', 'Введите заголовок', 'error');
         return;
     }
     
     try {
         const response = await fetch(`${API_URL}/reminders`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reminder)
         });
         
         if (response.ok) {
-            showNotification('Успех', `Напоминание "${reminder.title}" создано`, 'success');
-            
-            // Очищаем форму
-            document.getElementById('reminder-form').reset();
+            showToast('Успех', `Напоминание "${reminder.title}" создано`, 'success');
+            document.getElementById('reminderForm').reset();
             document.getElementById('date').value = new Date().toISOString().split('T')[0];
-            
-            // Перезагружаем список
             await loadReminders();
         } else {
             throw new Error('Ошибка создания');
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        showNotification('Ошибка', 'Не удалось создать напоминание', 'error');
+        showToast('Ошибка', 'Не удалось создать напоминание', 'error');
     }
 }
 
-// Отметить напоминание как выполненное
+// Отметить как выполненное
 window.completeReminder = async function(id) {
-    if (confirm('Отметить это напоминание как выполненное?')) {
-        try {
-            const response = await fetch(`${API_URL}/reminders/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ is_completed: true })
-            });
-            
-            if (response.ok) {
-                showNotification('Выполнено', 'Напоминание отмечено как выполненное', 'success');
-                await loadReminders();
-            }
-        } catch (error) {
-            console.error('Ошибка:', error);
-            showNotification('Ошибка', 'Не удалось обновить напоминание', 'error');
-        }
+    if (!confirm('Отметить как выполненное?')) return;
+    
+    try {
+        await fetch(`${API_URL}/reminders/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_completed: true })
+        });
+        showToast('Выполнено', 'Напоминание отмечено как выполненное', 'success');
+        await loadReminders();
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка', 'Не удалось обновить', 'error');
     }
 };
 
 // Удалить напоминание
 window.deleteReminder = async function(id) {
-    if (confirm('Удалить это напоминание?')) {
-        try {
-            const response = await fetch(`${API_URL}/reminders/${id}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.ok) {
-                showNotification('Удалено', 'Напоминание удалено', 'success');
-                await loadReminders();
-            }
-        } catch (error) {
-            console.error('Ошибка:', error);
-            showNotification('Ошибка', 'Не удалось удалить напоминание', 'error');
-        }
+    if (!confirm('Удалить напоминание?')) return;
+    
+    try {
+        await fetch(`${API_URL}/reminders/${id}`, { method: 'DELETE' });
+        showToast('Удалено', 'Напоминание удалено', 'success');
+        await loadReminders();
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка', 'Не удалось удалить', 'error');
     }
 };
-
-// Проверка сегодняшних напоминаний
-function checkTodayReminders() {
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date();
-    
-    reminders.forEach(reminder => {
-        if (reminder.date === today && !reminder.is_completed) {
-            const reminderTime = new Date(`${today}T${reminder.time}`);
-            const timeDiff = reminderTime - now;
-            
-            // Если напоминание в течение 30 минут
-            if (timeDiff > 0 && timeDiff < 30 * 60 * 1000) {
-                const minutes = Math.floor(timeDiff / (60 * 1000));
-                showNotification(
-                    'Скоро напоминание!',
-                    `"${reminder.title}" через ${minutes} минут`,
-                    'info'
-                );
-            }
-        }
-    });
-}
 
 // Включение уведомлений
 async function enableNotifications() {
@@ -305,36 +245,29 @@ async function enableNotifications() {
     }
     
     const permission = await Notification.requestPermission();
-    
     if (permission === 'granted') {
-        showNotification('Уведомления включены', 'Вы будете получать уведомления о напоминаниях', 'success');
-    } else if (permission === 'denied') {
-        alert('Уведомления заблокированы. Разрешите их в настройках браузера.');
+        showToast('Уведомления включены', 'Вы будете получать напоминания', 'success');
+    } else {
+        alert('Уведомления не разрешены');
     }
 }
 
 // Показать уведомление
-function showNotification(title, message, type = 'info') {
-    // Показываем в интерфейсе
-    const notification = document.getElementById('notification');
-    const text = document.getElementById('notification-text');
+function showToast(title, message, type = 'info') {
+    const toast = document.getElementById('notificationToast');
+    const msgElem = document.getElementById('toastMessage');
     
-    if (notification && text) {
-        text.textContent = `${title}: ${message}`;
-        notification.classList.remove('hidden');
+    if (toast && msgElem) {
+        msgElem.textContent = `${title}: ${message}`;
+        toast.classList.remove('hidden');
         
-        // Автоматическое скрытие через 5 секунд
         setTimeout(() => {
-            notification.classList.add('hidden');
-        }, 5000);
+            toast.classList.add('hidden');
+        }, 3000);
     }
     
-    // Браузерное уведомление
     if (Notification.permission === 'granted') {
-        new Notification(title, {
-            body: message,
-            icon: '/favicon.ico'
-        });
+        new Notification(title, { body: message });
     }
 }
 
@@ -342,19 +275,18 @@ function showNotification(title, message, type = 'info') {
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('ru-RU', {
-        weekday: 'short',
         day: 'numeric',
         month: 'short'
     });
 }
 
-function getPriorityText(priority) {
-    const priorities = {
-        high: 'Высокий 🔴',
-        medium: 'Средний 🟡',
-        low: 'Низкий 🟢'
+function getPriorityIcon(priority) {
+    const icons = {
+        high: '🔴',
+        medium: '🟡',
+        low: '🟢'
     };
-    return priorities[priority] || priority;
+    return icons[priority] || '⚪';
 }
 
 function escapeHtml(text) {
