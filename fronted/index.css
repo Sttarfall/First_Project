@@ -1,0 +1,392 @@
+/* index.css - Стили только для главной страницы */
+
+/* Форма создания напоминания */
+.create-reminder {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.create-reminder:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.create-reminder h3 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-green);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+}
+
+/* Группы полей формы */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+    border-color: var(--light-green);
+}
+
+/* Ряд полей (дата и время) */
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 1.2rem;
+}
+
+/* Кнопка отправки */
+.btn-submit {
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 139, 87, 0.3);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Список напоминаний */
+.reminders-list {
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.reminders-list h3 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-green);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+}
+
+/* Фильтры */
+.filters {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.6rem 1.2rem;
+    border: 2px solid var(--border-color);
+    background-color: transparent;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    color: var(--text-dark);
+}
+
+.filter-btn:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background-color: var(--primary-green);
+    color: white;
+    border-color: var(--primary-green);
+}
+
+/* Элемент напоминания */
+.reminder-item {
+    background-color: var(--background);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary-green);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reminder-item:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow);
+}
+
+.reminder-item.high {
+    border-left-color: #e74c3c;
+}
+
+.reminder-item.medium {
+    border-left-color: var(--primary-green);
+}
+
+.reminder-item.low {
+    border-left-color: #3498db;
+}
+
+.reminder-item.completed {
+    opacity: 0.6;
+    background-color: rgba(46, 139, 87, 0.1);
+}
+
+.reminder-item.completed h4 {
+    text-decoration: line-through;
+}
+
+.reminder-content {
+    flex: 1;
+}
+
+.reminder-content h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.reminder-content p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.reminder-date {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.reminder-date i {
+    color: var(--primary-green);
+}
+
+.reminder-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.reminder-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    padding: 5px;
+    border-radius: 6px;
+}
+
+.reminder-actions button:hover {
+    color: var(--primary-green);
+    background-color: rgba(46, 139, 87, 0.1);
+    transform: scale(1.1);
+}
+
+.reminder-actions .btn-delete:hover {
+    color: #e74c3c;
+}
+
+.reminder-actions .btn-complete:hover {
+    color: var(--primary-green);
+}
+
+/* Состояние загрузки */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Уведомление */
+.notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background-color: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 400px;
+    z-index: 1000;
+    border-left: 4px solid var(--complementary);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification.hidden {
+    display: none;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.notification-content i {
+    font-size: 1.5rem;
+    color: var(--complementary);
+}
+
+.notification-content h4 {
+    margin: 0 0 4px 0;
+    color: var(--text-dark);
+}
+
+.notification-content p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-light);
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+    color: var(--text-dark);
+}
+
+/* Адаптивность для главной страницы */
+@media (max-width: 768px) {
+    .create-reminder,
+    .reminders-list {
+        padding: 1.5rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .reminder-item {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .reminder-actions {
+        align-self: flex-end;
+    }
+    
+    .filters {
+        justify-content: center;
+    }
+    
+    .notification {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+        bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .create-reminder h3,
+    .reminders-list h3 {
+        font-size: 1.1rem;
+    }
+    
+    .filter-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .reminder-date {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}

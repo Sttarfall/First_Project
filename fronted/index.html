@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тихий напоминатель | Calm Reminder </title>
-    <link rel="stylesheet" href="style.css">
+    <title>Тихий Напоминатель | Главная</title>
+    
+    <!-- Внешние библиотеки -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+    
+    <!-- Наши файлы -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <div class="container">
         <!-- Боковая панель -->
         <aside class="sidebar">
             <div class="logo">
-                <i class="bell"></i>
-                <h1>Тихий напоминатель</h1>
+                <i class="fas fa-bell"></i>
+                <h1>Тихий Напоминатель</h1>
             </div>
+            
             <div class="stats">
                 <div class="stat-item">
                     <span class="stat-number" id="total-reminders">0</span>
@@ -26,82 +31,130 @@
                     <span class="stat-label">Сегодня</span>
                 </div>
             </div>
+            
             <nav class="nav-menu">
-                <a href="index.html" class="nav-link active"><i class="fas fa-home"></i> Главная</a>
-                <a href="calendar.html" class="nav-link"><i class="fas fa-calendar-alt"></i> Календарь</a>
-                <a href="settings.html" class="nav-link"><i class="fas fa-cog"></i> Настройки</a>
+                <a href="index.html" class="nav-link active">
+                    <i class="fas fa-home"></i> Главная
+                </a>
+                <a href="stats.html" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Статистика
+                </a>
+                <a href="calendar.html" class="nav-link">
+                    <i class="fas fa-calendar-alt"></i> Календарь
+                </a>
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i> Настройки
+                </a>
             </nav>
         </aside>
-        <!-- Основа -->
+
+        <!-- Основной контент -->
         <main class="main-content">
-            <!-- Шапка -->
             <header class="header">
                 <h2>Добро пожаловать!</h2>
                 <button class="btn-notifications" id="enable-notifications">
-                    <i class="bell"></i>Включить уведомления
+                    <i class="fas fa-bell"></i> Включить уведомления
                 </button>
             </header>
-            <!-- Создание напоминалок -->
+
+            <!-- Форма создания напоминания -->
             <section class="create-reminder">
-                <h3><i class="plus-circle"></i>Создать новое напоминание</h3>
+                <h3>
+                    <i class="fas fa-plus-circle"></i> 
+                    Создать новое напоминание
+                </h3>
+                
                 <form id="reminder-form">
                     <div class="form-group">
-                        <label for="title"><i class="heading"></i>Заголовок</label>
-                        <input type="text" id="title" placeholder="Встреча с друзьями..." required>
+                        <label for="title">
+                            <i class="fas fa-heading"></i> Заголовок
+                        </label>
+                        <input type="text" id="title" 
+                               placeholder="Встреча, звонок, задача..." 
+                               required>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="date"><i class="calendar"></i>Дата</label>
+                            <label for="date">
+                                <i class="fas fa-calendar"></i> Дата
+                            </label>
                             <input type="date" id="date" required>
                         </div>
+                        
                         <div class="form-group">
-                            <label for="time"><i class="clock"></i>Время</label>
+                            <label for="time">
+                                <i class="fas fa-clock"></i> Время
+                            </label>
                             <input type="time" id="time" required>
                         </div>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="description"><i class="align-left"></i>Описание</label>
-                        <textarea id="description" rows="3" placeholder="Детали встречи..."></textarea>
+                        <label for="description">
+                            <i class="fas fa-align-left"></i> Описание
+                        </label>
+                        <textarea id="description" rows="3" 
+                                  placeholder="Детали напоминания..."></textarea>
                     </div>
+                    
                     <div class="form-group">
-                        <label for="priority"><i class="flag"></i>Приоритет</label>
+                        <label for="priority">
+                            <i class="fas fa-flag"></i> Приоритет
+                        </label>
                         <select id="priority">
-                            <option value="low">Низкий</option>
-                            <option value="medium" selected>Средний</option>
-                            <option value="high">Высокий</option>
+                            <option value="low">🟢 Низкий</option>
+                            <option value="medium" selected>🟡 Средний</option>
+                            <option value="high">🔴 Высокий</option>
                         </select>
                     </div>
+                    
                     <button type="submit" class="btn-submit">
-                        <i class="save"></i>Сохранить напоминание
+                        <i class="fas fa-save"></i> Сохранить напоминание
                     </button>
                 </form>
             </section>
+
             <!-- Список напоминаний -->
             <section class="reminders-list">
-                <h3><i class="list"></i> Предстоящие напоминания</h3>
+                <h3>
+                    <i class="fas fa-list"></i> 
+                    Предстоящие напоминания
+                </h3>
+                
                 <div class="filters">
-                    <button class="filter-btn active">Все</button>
-                    <button class="filter-btn">Сегодня</button>
-                    <button class="filter-btn">Неделя</button>
+                    <button class="filter-btn active" data-filter="all">
+                        Все
+                    </button>
+                    <button class="filter-btn" data-filter="today">
+                        Сегодня
+                    </button>
+                    <button class="filter-btn" data-filter="week">
+                        Неделя
+                    </button>
                 </div>
+                
                 <div id="reminders-container">
-                    <!-- Напоминания будут загружаться здесь -->
                     <div class="loading">Загрузка напоминаний...</div>
                 </div>
             </section>
         </main>
     </div>
-    <!-- Уведомления -->
+
+    <!-- Уведомление -->
     <div id="notification" class="notification hidden">
         <div class="notification-content">
-            <i class="bell"></i>
+            <i class="fas fa-bell"></i>
             <div>
-                <h4>Новое напоминание!</h4>
+                <h4>Напоминание!</h4>
                 <p id="notification-text"></p>
             </div>
         </div>
-        <button id="close-notification" class="close-btn">times</button>
+        <button id="close-notification" class="close-btn">&times;</button>
     </div>
+
+    <!-- Подключаем JavaScript -->
     <script src="script.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>
