@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
-app = Flask(__name__, static_folder='../frontend', static_url_path='')
+# Создаем приложение
+app = Flask(__name__, static_folder=None)  # Убираем static_folder
 CORS(app)
 
 # Конфигурация
@@ -38,14 +39,18 @@ class Reminder(db.Model):
 with app.app_context():
     db.create_all()
 
-# Статические файлы
+# ============ СТАТИЧЕСКИЕ ФАЙЛЫ ============
+# Указываем правильную папку для frontend
+FRONTEND_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+
 @app.route('/')
 def index():
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(FRONTEND_FOLDER, 'index.html')
 
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory(app.static_folder, path)
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Обслуживание всех статических файлов"""
+    return send_from_directory(FRONTEND_FOLDER, filename)
 
 # ============ API МАРШРУТЫ ============
 
@@ -120,13 +125,11 @@ def simple_stats():
         'completed_reminders': completed
     })
 
-# ДЕТАЛЬНАЯ СТАТИСТИКА (ДОБАВЛЕННЫЙ МАРШРУТ)
+# Детальная статистика
 @app.route('/api/stats/detailed', methods=['GET'])
 def detailed_stats():
     """Детальная статистика для графиков"""
     try:
-        from datetime import datetime
-        
         all_reminders = Reminder.query.all()
         
         total = len(all_reminders)
@@ -156,24 +159,15 @@ def detailed_stats():
                 except:
                     pass
         
-        if total > 0:
-            completion_rate = (completed / total) * 100
-        else:
-            completion_rate = 0
+        completion_rate = (completed / total * 100) if total > 0 else 0
         
-        result = {
+        return jsonify({
             'total': total,
             'completed': completed,
             'completion_rate': round(completion_rate, 1),
-            'priority_stats': {
-                'high': high,
-                'medium': medium,
-                'low': low
-            },
+            'priority_stats': {'high': high, 'medium': medium, 'low': low},
             'day_stats': day_stats
-        }
-        
-        return jsonify(result)
+        })
         
     except Exception as e:
         print(f"Ошибка: {e}")
@@ -187,8 +181,25 @@ def health():
 # ============ ЗАПУСК ============
 if __name__ == '__main__':
     print("=" * 60)
-    print("✅ Сервер запущен")
-    print("📍 http://localhost:5000")
-    print("📋 Проверьте: /api/stats/detailed")
+    print("✅ Тихий Напоминатель - Сервер запущен")
     print("=" * 60)
+    print(f"📍 http://localhost:5000")
+    print(f"📁 Папка с фронтендом: {FRONTEND_FOLDER}")
+    print()
+    print("📋 Доступные страницы:")
+    print("   http://localhost:5000/           - Главная")
+    print("   http://localhost:5000/stats.html - Статистика")
+    print("   http://localhost:5000/calendar.html - Календарь")
+    print("   http://localhost:5000/settings.html - Настройки")
+    print()
+    print("📋 API эндпоинты:")
+    print("   GET  /api/reminders")
+    print("   POST /api/reminders")
+    print("   GET  /api/reminders/today")
+    print("   GET  /api/reminders/range")
+    print("   GET  /api/stats")
+    print("   GET  /api/stats/detailed")
+    print("   GET  /api/health")
+    print("=" * 60)
+    
     app.run(debug=True, port=5000)
