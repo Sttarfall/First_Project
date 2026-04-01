@@ -187,6 +187,73 @@ def detailed_stats():
 def health():
     return jsonify({'status': 'ok', 'message': 'Server running'})
 
+# ДЕТАЛЬНАЯ СТАТИСТИКА (ДОБАВЬТЕ ЭТОТ КОД)
+@app.route('/api/stats/detailed', methods=['GET'])
+def detailed_stats():
+    """Детальная статистика для графиков"""
+    try:
+        from datetime import datetime
+        
+        # Получаем все напоминания из базы данных
+        all_reminders = Reminder.query.all()
+        
+        # Общая статистика
+        total = len(all_reminders)
+        completed = len([r for r in all_reminders if r.is_completed])
+        
+        # Статистика по приоритетам
+        high = len([r for r in all_reminders if r.priority == 'high'])
+        medium = len([r for r in all_reminders if r.priority == 'medium'])
+        low = len([r for r in all_reminders if r.priority == 'low'])
+        
+        # Статистика по дням недели
+        days_ru = {
+            0: 'Понедельник', 1: 'Вторник', 2: 'Среда',
+            3: 'Четверг', 4: 'Пятница', 5: 'Суббота', 6: 'Воскресенье'
+        }
+        
+        # Инициализируем счетчики
+        day_stats = {
+            'Понедельник': 0, 'Вторник': 0, 'Среда': 0,
+            'Четверг': 0, 'Пятница': 0, 'Суббота': 0, 'Воскресенье': 0
+        }
+        
+        # Считаем напоминания по дням
+        for reminder in all_reminders:
+            if reminder.date:
+                try:
+                    date_obj = datetime.strptime(reminder.date, '%Y-%m-%d')
+                    weekday = date_obj.weekday()
+                    day_name = days_ru[weekday]
+                    day_stats[day_name] += 1
+                except:
+                    pass
+        
+        # Процент выполнения
+        if total > 0:
+            completion_rate = (completed / total) * 100
+        else:
+            completion_rate = 0
+        
+        # Формируем ответ
+        result = {
+            'total': total,
+            'completed': completed,
+            'completion_rate': round(completion_rate, 1),
+            'priority_stats': {
+                'high': high,
+                'medium': medium,
+                'low': low
+            },
+            'day_stats': day_stats
+        }
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(f"Ошибка в detailed_stats: {e}")
+        return jsonify({'error': str(e)}), 500
+
 # ============ ЗАПУСК ============
 if __name__ == '__main__':
     print("=" * 60)
