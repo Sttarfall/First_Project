@@ -3,9 +3,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
-import sys
 
-# Создаем приложение
 app = Flask(__name__)
 CORS(app)
 
@@ -16,23 +14,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Определяем путь к папке frontend
-# Получаем путь к папке, где находится app.py
-BACKEND_PATH = os.path.dirname(os.path.abspath(__file__))
-# Поднимаемся на уровень выше и заходим в frontend
-FRONTEND_PATH = os.path.join(BACKEND_PATH, '..', 'frontend')
-# Нормализуем путь (убираем .. и .)
-FRONTEND_PATH = os.path.abspath(FRONTEND_PATH)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 
 print("=" * 60)
-print(f"Путь к бэкенду: {BACKEND_PATH}")
-print(f"Путь к фронтенду: {FRONTEND_PATH}")
-print(f"Существует ли папка? {os.path.exists(FRONTEND_PATH)}")
-
-if os.path.exists(FRONTEND_PATH):
-    print(f"Файлы в папке: {os.listdir(FRONTEND_PATH)}")
-else:
-    print("ОШИБКА: Папка frontend не найдена!")
-    print(f"Создайте папку: {FRONTEND_PATH}")
+print(f"Базовая директория: {BASE_DIR}")
+print(f"Папка frontend: {FRONTEND_DIR}")
+print(f"Существует: {os.path.exists(FRONTEND_DIR)}")
+if os.path.exists(FRONTEND_DIR):
+    print(f"Файлы: {os.listdir(FRONTEND_DIR)}")
 print("=" * 60)
 
 # Модель данных
@@ -44,6 +34,7 @@ class Reminder(db.Model):
     time = db.Column(db.String(5), nullable=False)
     priority = db.Column(db.String(20), default='medium')
     is_completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def to_dict(self):
         return {
@@ -53,7 +44,8 @@ class Reminder(db.Model):
             'date': self.date,
             'time': self.time,
             'priority': self.priority,
-            'is_completed': self.is_completed
+            'is_completed': self.is_completed,
+            'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
 # Создаем таблицы
@@ -61,20 +53,60 @@ with app.app_context():
     db.create_all()
     print("✅ База данных создана")
 
-# ============ СТАТИЧЕСКИЕ ФАЙЛЫ ============
+# ============ МАРШРУТЫ ДЛЯ СТРАНИЦ ============
 
 @app.route('/')
 def index():
     """Главная страница"""
-    return send_from_directory(FRONTEND_PATH, 'index.html')
+    return send_from_directory(FRONTEND_DIR, 'index.html')
 
+@app.route('/stats.html')
+def stats_page():
+    """Страница статистики"""
+    return send_from_directory(FRONTEND_DIR, 'stats.html')
+
+@app.route('/calendar.html')
+def calendar_page():
+    """Страница календаря"""
+    return send_from_directory(FRONTEND_DIR, 'calendar.html')
+
+@app.route('/settings.html')
+def settings_page():
+    """Страница настроек"""
+    return send_from_directory(FRONTEND_DIR, 'settings.html')
+
+@app.route('/style.css')
+def serve_css():
+    """Общие стили"""
+    return send_from_directory(FRONTEND_DIR, 'style.css')
+
+@app.route('/index.js')
+def serve_index_js():
+    """JavaScript для главной страницы"""
+    return send_from_directory(FRONTEND_DIR, 'index.js')
+
+@app.route('/stats.js')
+def serve_stats_js():
+    """JavaScript для статистики"""
+    return send_from_directory(FRONTEND_DIR, 'stats.js')
+
+@app.route('/calendar.js')
+def serve_calendar_js():
+    """JavaScript для календаря"""
+    return send_from_directory(FRONTEND_DIR, 'calendar.js')
+
+@app.route('/settings.js')
+def serve_settings_js():
+    """JavaScript для настроек"""
+    return send_from_directory(FRONTEND_DIR, 'settings.js')
+
+# Общий маршрут для любых других статических файлов (css, js, images)
 @app.route('/<path:filename>')
 def serve_static(filename):
-    """Обслуживание всех статических файлов"""
-    # Проверяем, существует ли файл
-    file_path = os.path.join(FRONTEND_PATH, filename)
+    """Обслуживание статических файлов"""
+    file_path = os.path.join(FRONTEND_DIR, filename)
     if os.path.exists(file_path):
-        return send_from_directory(FRONTEND_PATH, filename)
+        return send_from_directory(FRONTEND_DIR, filename)
     else:
         return jsonify({'error': f'File {filename} not found'}), 404
 
@@ -83,14 +115,19 @@ def serve_static(filename):
 # Получить все напоминания
 @app.route('/api/reminders', methods=['GET'])
 def get_reminders():
-    reminders = Reminder.query.filter_by(is_completed=False).order_by(
-        Reminder.date, Reminder.time
-    ).all()
-    return jsonify([r.to_dict() for r in reminders])
+    """Получить все активные напоминания"""
+    try:
+        reminders = Reminder.query.filter_by(is_completed=False).order_by(
+            Reminder.date, Reminder.time
+        ).all()
+        return jsonify([r.to_dict() for r in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Создать напоминание
 @app.route('/api/reminders', methods=['POST'])
 def create_reminder():
+    """Создать новое напоминание"""
     try:
         data = request.json
         reminder = Reminder(
@@ -109,9 +146,11 @@ def create_reminder():
 # Обновить напоминание
 @app.route('/api/reminders/<int:id>', methods=['PUT'])
 def update_reminder(id):
+    """Обновить напоминание"""
     try:
         reminder = Reminder.query.get_or_404(id)
         data = request.json
+        
         if 'title' in data:
             reminder.title = data['title']
         if 'description' in data:
@@ -124,6 +163,7 @@ def update_reminder(id):
             reminder.priority = data['priority']
         if 'is_completed' in data:
             reminder.is_completed = data['is_completed']
+        
         db.session.commit()
         return jsonify(reminder.to_dict())
     except Exception as e:
@@ -132,6 +172,7 @@ def update_reminder(id):
 # Удалить напоминание
 @app.route('/api/reminders/<int:id>', methods=['DELETE'])
 def delete_reminder(id):
+    """Удалить напоминание"""
     try:
         reminder = Reminder.query.get_or_404(id)
         db.session.delete(reminder)
@@ -142,27 +183,59 @@ def delete_reminder(id):
 
 # Напоминания на сегодня
 @app.route('/api/reminders/today', methods=['GET'])
-def today_reminders():
-    today = datetime.now().strftime('%Y-%m-%d')
-    reminders = Reminder.query.filter_by(date=today, is_completed=False).all()
-    return jsonify([r.to_dict() for r in reminders])
+def get_today_reminders():
+    """Получить напоминания на сегодня"""
+    try:
+        today = datetime.now().strftime('%Y-%m-%d')
+        reminders = Reminder.query.filter_by(
+            date=today, 
+            is_completed=False
+        ).order_by(Reminder.time).all()
+        return jsonify([r.to_dict() for r in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Напоминания за период
+@app.route('/api/reminders/range', methods=['GET'])
+def get_reminders_range():
+    """Получить напоминания за период"""
+    try:
+        start = request.args.get('start')
+        end = request.args.get('end')
+        
+        if not start or not end:
+            return jsonify({'error': 'Missing dates'}), 400
+        
+        reminders = Reminder.query.filter(
+            Reminder.date >= start,
+            Reminder.date <= end
+        ).all()
+        return jsonify([r.to_dict() for r in reminders])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Простая статистика
 @app.route('/api/stats', methods=['GET'])
 def simple_stats():
-    total = Reminder.query.count()
-    completed = Reminder.query.filter_by(is_completed=True).count()
-    today = datetime.now().strftime('%Y-%m-%d')
-    today_count = Reminder.query.filter_by(date=today).count()
-    return jsonify({
-        'total_reminders': total,
-        'today_reminders': today_count,
-        'completed_reminders': completed
-    })
+    """Простая статистика"""
+    try:
+        total = Reminder.query.count()
+        completed = Reminder.query.filter_by(is_completed=True).count()
+        today = datetime.now().strftime('%Y-%m-%d')
+        today_count = Reminder.query.filter_by(date=today).count()
+        
+        return jsonify({
+            'total_reminders': total,
+            'today_reminders': today_count,
+            'completed_reminders': completed
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Детальная статистика
 @app.route('/api/stats/detailed', methods=['GET'])
 def detailed_stats():
+    """Детальная статистика для графиков"""
     try:
         all_reminders = Reminder.query.all()
         
@@ -209,7 +282,12 @@ def detailed_stats():
 # Проверка здоровья
 @app.route('/api/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'ok', 'message': 'Сервер работает'})
+    """Проверка работоспособности"""
+    return jsonify({
+        'status': 'ok', 
+        'message': 'Сервер работает',
+        'frontend_path': FRONTEND_DIR
+    })
 
 # ============ ЗАПУСК ============
 if __name__ == '__main__':
@@ -218,16 +296,17 @@ if __name__ == '__main__':
     print("=" * 60)
     print(f"📍 http://localhost:5000")
     print()
-    print("📋 Проверьте доступность страниц:")
-    print(f"   http://localhost:5000/")
-    print(f"   http://localhost:5000/stats.html")
-    print(f"   http://localhost:5000/calendar.html")
-    print(f"   http://localhost:5000/settings.html")
+    print("📋 Страницы:")
+    print(f"   ✅ http://localhost:5000/           - Главная")
+    print(f"   ✅ http://localhost:5000/stats.html - Статистика")
+    print(f"   ✅ http://localhost:5000/calendar.html - Календарь")
+    print(f"   ✅ http://localhost:5000/settings.html - Настройки")
     print()
     print("📋 API эндпоинты:")
     print("   GET  /api/reminders")
     print("   POST /api/reminders")
     print("   GET  /api/reminders/today")
+    print("   GET  /api/reminders/range")
     print("   GET  /api/stats")
     print("   GET  /api/stats/detailed")
     print("   GET  /api/health")
