@@ -5,32 +5,22 @@ const API_URL = 'http://localhost:5000/api';
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Приложение загружено');
     
-    // Проверка поддержки Service Worker
-    if ('serviceWorker' in navigator) {
-        try {
-            await navigator.serviceWorker.register('/service-worker.js');
-            console.log('Service Worker зарегистрирован');
-        } catch (error) {
-            console.error('Ошибка регистрации Service Worker:', error);
-        }
-    }
+    // Установка даты по умолчанию
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').value = today;
+    document.getElementById('date').min = today;
+    
+    // Установка времени по умолчанию (следующий час)
+    const nextHour = new Date();
+    nextHour.setHours(nextHour.getHours() + 1);
+    const timeString = nextHour.toTimeString().substring(0, 5);
+    document.getElementById('time').value = timeString;
     
     // Загрузка напоминаний
-    await loadRemindersFromServer();
-    
-    // Установка минимальной даты
-    document.getElementById('date').min = new Date().toISOString().split('T')[0];
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
-    
-    // Установка текущего времени (округление до ближайших 15 минут)
-    const now = new Date();
-    const minutes = Math.ceil(now.getMinutes() / 15) * 15;
-    now.setMinutes(minutes);
-    const timeString = now.toTimeString().substring(0, 5);
-    document.getElementById('time').value = timeString;
+    await loadReminders();
 });
 
-// Обработка формы создания напоминания
+// Обработка формы
 document.getElementById('reminder-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -52,30 +42,32 @@ document.getElementById('reminder-form').addEventListener('submit', async (e) =>
         });
         
         if (response.ok) {
-            const result = await response.json();
             showNotification('Успех!', `Напоминание "${reminder.title}" создано`);
-            document.getElementById('reminder-form').reset();
+            e.target.reset();
             
-            // Сброс значений к текущим
+            // Сброс к значениям по умолчанию
             document.getElementById('date').value = new Date().toISOString().split('T')[0];
-            document.getElementById('time').value = new Date().toTimeString().substring(0, 5);
+            const nextHour = new Date();
+            nextHour.setHours(nextHour.getHours() + 1);
+            document.getElementById('time').value = nextHour.toTimeString().substring(0, 5);
             
-            await loadRemindersFromServer();
+            await loadReminders();
         } else {
-            throw new Error('Ошибка сервера');
+            const error = await response.json();
+            throw new Error(error.error || 'Ошибка сервера');
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        showNotification('Ошибка', 'Не удалось создать напоминание');
+        showNotification('Ошибка', error.message || 'Не удалось создать напоминание');
         
         // Временное сохранение в localStorage
         saveToLocalStorage(reminder);
-        loadReminders();
+        displayLocalReminders();
     }
 });
 
-// Загрузка напоминаний с сервера
-async function loadRemindersFromServer() {
+// Загрузка напоминаний
+async function loadReminders() {
     try {
         const response = await fetch(`${API_URL}/reminders`);
         if (response.ok) {
@@ -83,12 +75,11 @@ async function loadRemindersFromServer() {
             displayReminders(reminders);
             updateStats(reminders);
         } else {
-            throw new Error('Ошибка загрузки с сервера');
+            throw new Error('Ошибка загрузки');
         }
     } catch (error) {
         console.error('Ошибка загрузки с сервера:', error);
-        // Если сервер не доступен, загружаем из localStorage
-        loadReminders();
+        displayLocalReminders();
     }
 }
 
@@ -97,65 +88,51 @@ function displayReminders(reminders) {
     const container = document.getElementById('reminders-container');
     
     if (!reminders || reminders.length === 0) {
-        container.innerHTML = '<div class="loading">Нет напоминаний</div>';
+        container.innerHTML = '<div class="loading">Нет напоминаний. Создайте первое!</div>';
         return;
     }
-    
-    // Сортировка по дате и времени
-    reminders.sort((a, b) => {
-        const dateA = new Date(a.date + 'T' + a.time);
-        const dateB = new Date(b.date + 'T' + b.time);
-        return dateA - dateB;
-    });
     
     container.innerHTML = '';
     
     reminders.forEach(reminder => {
-        const reminderElement = createReminderElement(reminder);
-        container.appendChild(reminderElement);
-    });
-}
-
-// Создание элемента напоминания
-function createReminderElement(reminder) {
-    const div = document.createElement('div');
-    div.className = `reminder-item ${reminder.priority}`;
-    div.dataset.id = reminder.id;
-    
-    const date = new Date(reminder.date + 'T' + reminder.time);
-    const formattedDate = date.toLocaleDateString('ru-RU', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    
-    div.innerHTML = `
-        <div class="reminder-content">
-            <h4>${reminder.title}</h4>
-            <p>${reminder.description || ''}</p>
-            <div class="reminder-date">
-                <i class="fas fa-calendar"></i>
-                <span>${formattedDate}</span>
-                <i class="fas fa-clock"></i>
-                <span>${reminder.time}</span>
+        const div = document.createElement('div');
+        div.className = `reminder-item ${reminder.priority}`;
+        div.dataset.id = reminder.id;
+        
+        const date = new Date(reminder.date + 'T' + reminder.time);
+        const formattedDate = date.toLocaleDateString('ru-RU', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        div.innerHTML = `
+            <div class="reminder-content">
+                <h4>${reminder.title}</h4>
+                <p>${reminder.description || ''}</p>
+                <div class="reminder-date">
+                    <i class="fas fa-calendar"></i>
+                    <span>${formattedDate}</span>
+                    <i class="fas fa-clock"></i>
+                    <span>${reminder.time}</span>
+                </div>
             </div>
-        </div>
-        <div class="reminder-actions">
-            <button class="btn-complete" title="Выполнить">
-                <i class="fas fa-check"></i>
-            </button>
-            <button class="btn-delete" title="Удалить">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `;
-    
-    // Обработчики для кнопок
-    div.querySelector('.btn-delete').addEventListener('click', () => deleteReminder(reminder.id));
-    div.querySelector('.btn-complete').addEventListener('click', () => completeReminder(reminder.id));
-    
-    return div;
+            <div class="reminder-actions">
+                <button class="btn-complete" title="Выполнить">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="btn-delete" title="Удалить">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        div.querySelector('.btn-delete').addEventListener('click', () => deleteReminder(reminder.id));
+        div.querySelector('.btn-complete').addEventListener('click', () => completeReminder(reminder.id));
+        
+        container.appendChild(div);
+    });
 }
 
 // Удаление напоминания
@@ -168,15 +145,12 @@ async function deleteReminder(id) {
             
             if (response.ok) {
                 showNotification('Удалено', 'Напоминание удалено');
-                await loadRemindersFromServer();
+                await loadReminders();
             }
         } catch (error) {
             console.error('Ошибка удаления:', error);
-            // Если сервер не доступен, удаляем из localStorage
-            const reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
-            const filtered = reminders.filter(r => r.id !== id);
-            localStorage.setItem('reminders', JSON.stringify(filtered));
-            loadReminders();
+            deleteFromLocalStorage(id);
+            displayLocalReminders();
         }
     }
 }
@@ -194,7 +168,7 @@ async function completeReminder(id) {
         
         if (response.ok) {
             showNotification('Выполнено!', 'Напоминание отмечено как выполненное');
-            await loadRemindersFromServer();
+            await loadReminders();
         }
     } catch (error) {
         console.error('Ошибка:', error);
@@ -210,31 +184,6 @@ function updateStats(reminders) {
     
     document.getElementById('total-reminders').textContent = reminders.length;
     document.getElementById('today-reminders').textContent = todayCount;
-    
-    // Проверка на сегодняшние напоминания
-    checkTodayReminders(reminders);
-}
-
-// Проверка сегодняшних напоминаний
-function checkTodayReminders(reminders) {
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date();
-    
-    reminders.forEach(reminder => {
-        if (reminder.date === today && !reminder.is_completed) {
-            const reminderTime = new Date(today + 'T' + reminder.time);
-            const timeDiff = reminderTime - now;
-            
-            // Если напоминание в течение 30 минут
-            if (timeDiff > 0 && timeDiff < 30 * 60 * 1000) {
-                const minutes = Math.floor(timeDiff / (60 * 1000));
-                showNotification(
-                    'Скоро напоминание!',
-                    `"${reminder.title}" через ${minutes} минут`
-                );
-            }
-        }
-    });
 }
 
 // Функции для работы с localStorage (резервные)
@@ -245,7 +194,13 @@ function saveToLocalStorage(reminder) {
     localStorage.setItem('reminders', JSON.stringify(reminders));
 }
 
-function loadReminders() {
+function deleteFromLocalStorage(id) {
+    const reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
+    const filtered = reminders.filter(r => r.id !== id);
+    localStorage.setItem('reminders', JSON.stringify(filtered));
+}
+
+function displayLocalReminders() {
     const reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
     displayReminders(reminders);
     updateStats(reminders);
@@ -259,7 +214,6 @@ function showNotification(title, message) {
     text.textContent = `${title}: ${message}`;
     notification.classList.remove('hidden');
     
-    // Автоматическое скрытие через 5 секунд
     setTimeout(() => {
         notification.classList.add('hidden');
     }, 5000);
@@ -267,8 +221,7 @@ function showNotification(title, message) {
     // Браузерные уведомления
     if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(title, {
-            body: message,
-            icon: '/icons/icon-192.png'
+            body: message
         });
     }
 }
@@ -280,17 +233,8 @@ document.getElementById('enable-notifications').addEventListener('click', async 
         
         if (permission === 'granted') {
             showNotification('Уведомления включены', 'Вы будете получать уведомления о напоминаниях');
-            
-            // Регистрация Service Worker для Push уведомлений
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.ready;
-                    // Здесь можно добавить подписку на Push уведомления
-                    console.log('Готов к Push уведомлениям');
-                } catch (error) {
-                    console.error('Ошибка Service Worker:', error);
-                }
-            }
+        } else if (permission === 'denied') {
+            alert('Уведомления заблокированы. Разрешите их в настройках браузера.');
         }
     } else {
         alert('Ваш браузер не поддерживает уведомления');
@@ -307,17 +251,25 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        filterReminders(this.textContent);
+        
+        const filter = this.textContent;
+        if (filter === 'Все') {
+            loadReminders();
+        } else if (filter === 'Сегодня') {
+            filterReminders('today');
+        } else if (filter === 'Неделя') {
+            filterReminders('week');
+        }
     });
 });
 
-async function filterReminders(filter) {
+async function filterReminders(type) {
     try {
         let url = `${API_URL}/reminders`;
         
-        if (filter === 'Сегодня') {
+        if (type === 'today') {
             url = `${API_URL}/reminders/today`;
-        } else if (filter === 'Неделя') {
+        } else if (type === 'week') {
             const today = new Date();
             const weekLater = new Date(today);
             weekLater.setDate(today.getDate() + 7);
@@ -337,8 +289,3 @@ async function filterReminders(filter) {
         console.error('Ошибка фильтрации:', error);
     }
 }
-
-// Периодическая проверка напоминаний
-setInterval(async () => {
-    await loadRemindersFromServer();
-}, 300000); // Каждые 5 минут
