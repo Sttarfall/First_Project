@@ -8,13 +8,11 @@ from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 CORS(app)
 
-# Конфигурация
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reminders.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Определяем путь к папке frontend
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
 
@@ -26,7 +24,6 @@ if os.path.exists(FRONTEND_DIR):
     print(f"Файлы: {os.listdir(FRONTEND_DIR)}")
 print("=" * 60)
 
-# Модель данных
 class Reminder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -49,12 +46,11 @@ class Reminder(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
-# Создаем таблицы
 with app.app_context():
     db.create_all()
     print("✅ База данных создана")
 
-# ============ МАРШРУТЫ ДЛЯ СТРАНИЦ ============
+# МАРШРУТЫ ДЛЯ СТРАНИЦ 
 
 @app.route('/')
 def index():
@@ -101,7 +97,6 @@ def serve_settings_js():
     """JavaScript для настроек"""
     return send_from_directory(FRONTEND_DIR, 'settings.js')
 
-# Общий маршрут для любых других статических файлов (css, js, images)
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Обслуживание статических файлов"""
@@ -111,9 +106,8 @@ def serve_static(filename):
     else:
         return jsonify({'error': f'File {filename} not found'}), 404
 
-# ============ API МАРШРУТЫ ============
+# API МАРШРУТЫ 
 
-# Получить все напоминания
 @app.route('/api/reminders', methods=['GET'])
 def get_reminders():
     """Получить все активные напоминания"""
@@ -131,18 +125,16 @@ def create_reminder():
     try:
         data = request.json
         
-        # Получаем текущую дату в локальном часовом поясе
-        local_tz = timezone(timedelta(hours=3))  # Для Москвы UTC+3
+        local_tz = timezone(timedelta(hours=3))  # Для Москвы (+3)
         current_date = datetime.now(local_tz).strftime('%Y-%m-%d')
         
-        # Проверяем, что дата не в прошлом
         if data['date'] < current_date:
             return jsonify({'error': 'Нельзя создать напоминание в прошлом'}), 400
         
         reminder = Reminder(
             title=data['title'],
             description=data.get('description', ''),
-            date=data['date'],  # Сохраняем как есть, без преобразования
+            date=data['date'],
             time=data['time'],
             priority=data.get('priority', 'medium')
         )
@@ -298,7 +290,7 @@ def health():
         'frontend_path': FRONTEND_DIR
     })
 
-# ============ ЗАПУСК ============
+# ЗАПУСК 
 if __name__ == '__main__':
     print("=" * 60)
     print("✅ Тихий Напоминатель - Сервер запущен")

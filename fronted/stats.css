@@ -1,39 +1,6 @@
-/* stats.css - Стили для страницы статистики */
-
-/* Основной контейнер */
 .container {
     display: flex;
     min-height: 100vh;
-}
-
-/* Боковая панель (если не определена в style.css) */
-.sidebar {
-    width: 260px;
-    background: linear-gradient(135deg, #2E8B57, #1a5d3a);
-    color: white;
-    padding: 2rem 1.5rem;
-    position: fixed;
-    height: 100vh;
-    left: 0;
-    top: 0;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.logo i {
-    font-size: 1.8rem;
-}
-
-.logo h1 {
-    font-size: 1.2rem;
-    font-weight: 600;
 }
 
 .nav-menu {
@@ -280,4 +247,41 @@ canvas {
     .stats-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    color: var(--primary-green);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+canvas {
+    max-height: 300px;
+    width: 100% !important;
 }

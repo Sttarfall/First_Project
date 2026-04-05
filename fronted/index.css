@@ -1,5 +1,3 @@
-/* index.css - Стили только для главной страницы */
-
 /* Форма создания напоминания */
 .create-reminder {
     background-color: var(--card-bg);
@@ -388,5 +386,50 @@
     .reminder-date {
         flex-wrap: wrap;
         gap: 8px;
+    }
+}
+
+.create-reminder {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.reminders-list {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.reminder-item {
+    background: var(--background);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary-green);
+    transition: all 0.3s;
+}
+
+.reminder-item:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow);
+}
+
+.reminder-item.high { border-left-color: #e74c3c; }
+.reminder-item.medium { border-left-color: var(--primary-green); }
+.reminder-item.low { border-left-color: #3498db; }
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
     }
 }

@@ -1,11 +1,9 @@
-// index.js - Полная логика главной страницы
-
 const API_URL = 'http://localhost:5000/api';
 let reminders = [];
 let currentFilter = 'all';
 let notificationCheckInterval = null;
 
-// ============ ИНИЦИАЛИЗАЦИЯ ============
+//  ИНИЦИАЛИЗАЦИЯ 
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Главная страница загружена');
@@ -48,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     startNotificationChecker();
 });
 
-// ============ SERVICE WORKER ============
+// SERVICE WORKER 
 
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -63,7 +61,7 @@ async function registerServiceWorker() {
     return null;
 }
 
-// ============ УВЕДОМЛЕНИЯ ============
+// УВЕДОМЛЕНИЯ 
 
 async function requestNotificationPermission() {
     if (!('Notification' in window)) {
@@ -219,7 +217,7 @@ function playNotificationSound(type = 'normal') {
     }
 }
 
-// ============ ЗАГРУЗКА И ОТОБРАЖЕНИЕ ============
+// ЗАГРУЗКА И ОТОБРАЖЕНИЕ 
 
 async function loadReminders() {
     try {
@@ -335,7 +333,7 @@ function displayReminders(remindersList) {
     }).join('');
 }
 
-// ============ СОЗДАНИЕ НАПОМИНАНИЯ ============
+// СОЗДАНИЕ НАПОМИНАНИЯ 
 
 async function handleCreateReminder(e) {
     e.preventDefault();
@@ -394,7 +392,7 @@ async function handleCreateReminder(e) {
     }
 }
 
-// ============ УПРАВЛЕНИЕ НАПОМИНАНИЯМИ ============
+// УПРАВЛЕНИЕ НАПОМИНАНИЯМИ 
 
 window.completeReminder = async function(id) {
     if (!confirm('Отметить это напоминание как выполненное?')) return;
@@ -434,7 +432,7 @@ window.deleteReminder = async function(id) {
     }
 };
 
-// ============ НАСТРОЙКА ОБРАБОТЧИКОВ ============
+// НАСТРОЙКА ОБРАБОТЧИКОВ 
 
 function setupEventListeners() {
     // Форма создания
@@ -470,7 +468,7 @@ function setupEventListeners() {
     });
 }
 
-// ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ 
 
 function getTodayString() {
     const now = new Date();
