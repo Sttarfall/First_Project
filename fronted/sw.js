@@ -1,49 +1,55 @@
-// Service Worker для уведомлений
 const CACHE_NAME = 'calm-reminder-v1';
 
+console.log('Service Worker загружен!');
+
 self.addEventListener('install', event => {
-    console.log('Service Worker установлен');
+    console.log('SW: Установлен');
     self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
-    console.log('Service Worker активирован');
+    console.log('SW: Активирован');
     event.waitUntil(clients.claim());
 });
 
+self.addEventListener('fetch', event => {
+    // Логируем запросы для отладки
+    console.log('SW: Запрос к', event.request.url);
+});
+
 self.addEventListener('push', event => {
-    const data = event.data ? event.data.json() : {};
+    console.log('SW: Получено push-уведомление');
+    
+    let data = {
+        title: 'Тихий Напоминатель',
+        body: 'У вас новое напоминание!'
+    };
+    
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data.body = event.data.text();
+        }
+    }
+    
     const options = {
-        body: data.body || 'У вас новое напоминание!',
+        body: data.body,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
         vibrate: [200, 100, 200],
-        data: {
-            url: data.url || '/'
-        },
-        actions: [
-            {
-                action: 'open',
-                title: 'Открыть'
-            },
-            {
-                action: 'close',
-                title: 'Закрыть'
-            }
-        ]
+        data: { url: '/' }
     };
     
     event.waitUntil(
-        self.registration.showNotification(data.title || 'Тихий Напоминатель', options)
+        self.registration.showNotification(data.title, options)
     );
 });
 
 self.addEventListener('notificationclick', event => {
+    console.log('SW: Клик по уведомлению');
     event.notification.close();
-    
-    if (event.action === 'open') {
-        event.waitUntil(
-            clients.openWindow(event.notification.data.url || '/')
-        );
-    }
+    event.waitUntil(
+        clients.openWindow('/')
+    );
 });

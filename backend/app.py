@@ -181,6 +181,11 @@ def delete_reminder(id):
         return jsonify({'message': 'deleted'})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+    
+@app.route('/sw.js')
+def serve_sw():
+    """Service Worker"""
+    return send_from_directory(FRONTEND_DIR, 'sw.js')
 
 # Напоминания на сегодня
 @app.route('/api/reminders/today', methods=['GET'])
