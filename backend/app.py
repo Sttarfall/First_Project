@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
+from datetime import datetime, timezone, timedelta
 
 app = Flask(__name__)
 CORS(app)
@@ -127,13 +128,21 @@ def get_reminders():
 # Создать напоминание
 @app.route('/api/reminders', methods=['POST'])
 def create_reminder():
-    """Создать новое напоминание"""
     try:
         data = request.json
+        
+        # Получаем текущую дату в локальном часовом поясе
+        local_tz = timezone(timedelta(hours=3))  # Для Москвы UTC+3
+        current_date = datetime.now(local_tz).strftime('%Y-%m-%d')
+        
+        # Проверяем, что дата не в прошлом
+        if data['date'] < current_date:
+            return jsonify({'error': 'Нельзя создать напоминание в прошлом'}), 400
+        
         reminder = Reminder(
             title=data['title'],
             description=data.get('description', ''),
-            date=data['date'],
+            date=data['date'],  # Сохраняем как есть, без преобразования
             time=data['time'],
             priority=data.get('priority', 'medium')
         )
