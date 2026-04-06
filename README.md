@@ -1,16 +1,25 @@
-HEAD
-# First Project
+# Название проекта
+Calm Reminders \ Тихий напоминатель
 
-Мой первый проект, для защиты диплома. Это будет веб сайт напоминалка.
-
-# Calm Reinder
-
+## Описание 
 Тихий напоминатель - веб сайт, который будет напоминать человеку о своих делах, встречах и тд.
 
-# Functional 
+## Технологии
+Python 3.11, Flask 2.3, BOOTSTRAP 5, HTML 5, CSS 3, JavaScript ES15, Sqllite3
 
-Пользователь может выбрать дату, время, опсиание на свое усмотрение.
+## Запуск локально
+```bash
+cd ~/first_project
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install flask flask-cors flask-sqlalchemy
+pip install -r requirements.txt
+python app.py
+```
+## Тестовые данные
+Admin - администратор
+User - пользователь
 
-# Auditorium
-
-Целевая аудитория неограничена так как напоминалки могут делать все начиная с детей до пенсионеров.
+## Автор
+Юмабаев Арыслан
