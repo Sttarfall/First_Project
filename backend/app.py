@@ -132,6 +132,13 @@ def get_reminders():
 def create_reminder():
     try:
         data = request.json
+
+        print("=" * 50)
+        print(f"📥 ПОЛУЧЕНО ОТ ФРОНТЕНДА:")
+        print(f"   Заголовок: {data['title']}")
+        print(f"   Дата: {data['date']}")      # ← что приходит?
+        print(f"   Время: {data['time']}")     # ← что приходит?
+        print("=" * 50)
         
         local_tz = timezone(timedelta(hours=3))  # Для Москвы (+3)
         current_date = datetime.now(local_tz).strftime('%Y-%m-%d')
@@ -148,6 +155,12 @@ def create_reminder():
         )
         db.session.add(reminder)
         db.session.commit()
+
+        print(f"💾 СОХРАНЕНО В БД:")
+        print(f"   Дата: {reminder.date}")
+        print(f"   Время: {reminder.time}")
+        print("=" * 50)
+        
         return jsonify(reminder.to_dict()), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
