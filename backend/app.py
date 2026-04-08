@@ -2,10 +2,13 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import os
+from flask import render_template
 from datetime import datetime, timezone, timedelta
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder='../frontend/static',    
+            template_folder='../frontend/templates') 
 CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reminders.db'
@@ -55,22 +58,23 @@ with app.app_context():
 @app.route('/')
 def index():
     """Главная страница"""
-    return send_from_directory(FRONTEND_DIR, 'index.html')
+    return render_template('index.html')
 
 @app.route('/stats.html')
 def stats_page():
     """Страница статистики"""
-    return send_from_directory(FRONTEND_DIR, 'stats.html')
+    return render_template('stats.html')
 
 @app.route('/calendar.html')
 def calendar_page():
     """Страница календаря"""
-    return send_from_directory(FRONTEND_DIR, 'calendar.html')
+    return render_template('calendar.html')
 
 @app.route('/settings.html')
 def settings_page():
     """Страница настроек"""
-    return send_from_directory(FRONTEND_DIR, 'settings.html')
+    return render_template('settings.html')
+
 
 @app.route('/style.css')
 def serve_css():
