@@ -1,5 +1,13 @@
 const API_URL = 'http://localhost:5000/api';
 
+// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ: объект Date → строка ГГГГ-ММ-ДД (без сдвига по часовому поясу)
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 class CalendarApp {
     constructor() {
         this.currentDate = new Date();
@@ -22,19 +30,25 @@ class CalendarApp {
                 this.reminders = await response.json();
                 this.updateStats();
                 this.renderCalendar();
+            } else {
+                throw new Error('Ошибка загрузки');
             }
         } catch (error) {
             console.error('Ошибка загрузки напоминаний:', error);
             this.reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
+            this.renderCalendar();
         }
     }
 
     updateStats() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatLocalDate(new Date());
         const todayCount = this.reminders.filter(r => r.date === today).length;
         
-        document.getElementById('total-reminders').textContent = this.reminders.length;
-        document.getElementById('today-reminders').textContent = todayCount;
+        const totalElem = document.getElementById('total-reminders');
+        const todayElem = document.getElementById('today-reminders');
+        
+        if (totalElem) totalElem.textContent = this.reminders.length;
+        if (todayElem) todayElem.textContent = todayCount;
     }
 
     renderCalendar() {
@@ -47,8 +61,10 @@ class CalendarApp {
             'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
         ];
         
-        document.getElementById('current-month').textContent = 
-            `${monthNames[month]} ${year}`;
+        const monthHeader = document.getElementById('current-month');
+        if (monthHeader) {
+            monthHeader.textContent = `${monthNames[month]} ${year}`;
+        }
         
         // Получаем первый день месяца
         const firstDay = new Date(year, month, 1);
@@ -65,6 +81,7 @@ class CalendarApp {
         const prevMonthLastDay = new Date(year, month, 0).getDate();
         
         const calendarDays = document.getElementById('calendar-days');
+        if (!calendarDays) return;
         calendarDays.innerHTML = '';
         
         // Добавляем дни предыдущего месяца
@@ -78,8 +95,8 @@ class CalendarApp {
         const today = new Date();
         for (let i = 1; i <= totalDays; i++) {
             const date = new Date(year, month, i);
-            const isToday = date.toDateString() === today.toDateString();
-            const isSelected = date.toDateString() === this.selectedDate.toDateString();
+            const isToday = formatLocalDate(date) === formatLocalDate(today);
+            const isSelected = formatLocalDate(date) === formatLocalDate(this.selectedDate);
             
             this.createDayElement(date, calendarDays, false, isToday, isSelected);
         }
@@ -102,7 +119,8 @@ class CalendarApp {
         if (isToday) dayElement.classList.add('today');
         if (isSelected) dayElement.classList.add('selected');
         
-        dayElement.dataset.date = date.toISOString().split('T')[0];
+        // Сохраняем дату в локальном формате (без сдвига)
+        dayElement.dataset.date = formatLocalDate(date);
         
         const dayNumber = document.createElement('div');
         dayNumber.className = 'day-number';
@@ -116,29 +134,30 @@ class CalendarApp {
         
         if (dayReminders.length > 0) {
             dayReminders.slice(0, 3).forEach(reminder => {
-                const eventDot = document.createElement('span');
-                eventDot.className = `event-dot ${reminder.priority}`;
-                
-                const eventText = document.createElement('div');
-                eventText.className = 'event-item';
-                eventText.textContent = `${reminder.time} ${reminder.title.substring(0, 15)}...`;
-                
                 const eventDiv = document.createElement('div');
                 eventDiv.style.display = 'flex';
                 eventDiv.style.alignItems = 'center';
                 eventDiv.style.marginBottom = '2px';
+                
+                const eventDot = document.createElement('span');
+                eventDot.className = `event-dot ${reminder.priority}`;
+                
+                const eventText = document.createElement('span');
+                eventText.style.fontSize = '0.7rem';
+                eventText.style.marginLeft = '4px';
+                eventText.textContent = `${reminder.time} ${reminder.title.substring(0, 12)}`;
+                
                 eventDiv.appendChild(eventDot);
                 eventDiv.appendChild(eventText);
-                
                 dayEvents.appendChild(eventDiv);
             });
             
             if (dayReminders.length > 3) {
                 const moreText = document.createElement('div');
-                moreText.className = 'event-item';
-                moreText.textContent = `+${dayReminders.length - 3} еще...`;
                 moreText.style.fontSize = '0.65rem';
                 moreText.style.opacity = '0.7';
+                moreText.style.marginTop = '2px';
+                moreText.textContent = `+${dayReminders.length - 3} еще...`;
                 dayEvents.appendChild(moreText);
             }
         }
@@ -146,15 +165,19 @@ class CalendarApp {
         dayElement.appendChild(dayEvents);
         
         // Обработчик клика
-        dayElement.addEventListener('click', () => {
+        dayElement.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.selectDate(date);
         });
         
         container.appendChild(dayElement);
     }
 
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ - теперь правильно получает напоминания для даты
     getRemindersForDate(date) {
-        const dateStr = reminder.date;
+        // Преобразуем объект Date в строку локального формата
+        const dateStr = formatLocalDate(date);
+        // Фильтруем напоминания
         return this.reminders.filter(r => r.date === dateStr && !r.is_completed);
     }
 
@@ -168,15 +191,20 @@ class CalendarApp {
     updateSelectedDate() {
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const dateStr = this.selectedDate.toLocaleDateString('ru-RU', options);
-        document.getElementById('selected-date').textContent = dateStr;
+        const selectedDateElem = document.getElementById('selected-date');
+        if (selectedDateElem) {
+            selectedDateElem.textContent = dateStr;
+        }
     }
 
     showDayEvents() {
         const container = document.getElementById('day-events');
+        if (!container) return;
+        
         const reminders = this.getRemindersForDate(this.selectedDate);
         
         if (reminders.length === 0) {
-            container.innerHTML = '<div class="no-events">Нет напоминаний на этот день</div>';
+            container.innerHTML = '<div class="no-events">📭 Нет напоминаний на этот день</div>';
             return;
         }
         
@@ -185,17 +213,17 @@ class CalendarApp {
         
         container.innerHTML = reminders.map(reminder => `
             <div class="event-card ${reminder.priority}">
-                <div class="event-time">${reminder.time}</div>
+                <div class="event-time">⏰ ${reminder.time}</div>
                 <div class="event-info">
-                    <div class="event-title">${reminder.title}</div>
-                    ${reminder.description ? `<div class="event-description">${reminder.description}</div>` : ''}
+                    <div class="event-title">📌 ${this.escapeHtml(reminder.title)}</div>
+                    ${reminder.description ? `<div class="event-description">📝 ${this.escapeHtml(reminder.description)}</div>` : ''}
                 </div>
                 <div class="reminder-actions">
                     <button class="btn-complete" data-id="${reminder.id}" title="Выполнить">
-                        <i class="fas fa-check"></i>
+                        ✅
                     </button>
                     <button class="btn-delete" data-id="${reminder.id}" title="Удалить">
-                        <i class="fas fa-trash"></i>
+                        🗑️
                     </button>
                 </div>
             </div>
@@ -204,21 +232,21 @@ class CalendarApp {
         // Добавляем обработчики событий
         container.querySelectorAll('.btn-complete').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = parseInt(e.target.closest('button').dataset.id);
+                const id = parseInt(btn.dataset.id);
                 this.completeReminder(id);
             });
         });
         
         container.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = parseInt(e.target.closest('button').dataset.id);
+                const id = parseInt(btn.dataset.id);
                 this.deleteReminder(id);
             });
         });
     }
 
     async completeReminder(id) {
-        if (confirm('Отметить напоминание как выполненное?')) {
+        if (confirm('✅ Отметить напоминание как выполненное?')) {
             try {
                 const response = await fetch(`${API_URL}/reminders/${id}`, {
                     method: 'PUT',
@@ -227,66 +255,86 @@ class CalendarApp {
                 });
                 
                 if (response.ok) {
-                    this.loadReminders();
+                    await this.loadReminders();
                     this.showDayEvents();
                 }
             } catch (error) {
                 console.error('Ошибка:', error);
+                alert('Ошибка при обновлении');
             }
         }
     }
 
     async deleteReminder(id) {
-        if (confirm('Удалить это напоминание?')) {
+        if (confirm('🗑️ Удалить это напоминание?')) {
             try {
                 const response = await fetch(`${API_URL}/reminders/${id}`, {
                     method: 'DELETE'
                 });
                 
                 if (response.ok) {
-                    this.loadReminders();
+                    await this.loadReminders();
                     this.showDayEvents();
                 }
             } catch (error) {
                 console.error('Ошибка удаления:', error);
+                alert('Ошибка при удалении');
             }
         }
     }
 
     setupEventListeners() {
         // Навигация по месяцам
-        document.getElementById('prev-month').addEventListener('click', () => {
-            this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-            this.renderCalendar();
-        });
+        const prevBtn = document.getElementById('prev-month');
+        const nextBtn = document.getElementById('next-month');
+        const todayBtn = document.getElementById('today-btn');
+        const createEventBtn = document.getElementById('create-event');
         
-        document.getElementById('next-month').addEventListener('click', () => {
-            this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-            this.renderCalendar();
-        });
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.renderCalendar();
+            });
+        }
         
-        // Кнопка "Сегодня"
-        document.getElementById('today-btn').addEventListener('click', () => {
-            this.currentDate = new Date();
-            this.selectDate(new Date());
-            this.renderCalendar();
-        });
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.renderCalendar();
+            });
+        }
         
-        // Переключение видов
-        document.querySelectorAll('.view-btn').forEach(btn => {
+        if (todayBtn) {
+            todayBtn.addEventListener('click', () => {
+                this.currentDate = new Date();
+                this.selectDate(new Date());
+                this.renderCalendar();
+            });
+        }
+        
+        // Переключение видов (месяц/неделя/день)
+        const viewBtns = document.querySelectorAll('.view-btn');
+        viewBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const view = e.target.dataset.view;
+                const view = e.currentTarget.dataset.view;
                 
                 // Обновляем активные кнопки
-                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
+                viewBtns.forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
                 
                 // Скрываем все виды
-                document.querySelectorAll('.month-view, .week-view, .day-view')
-                    .forEach(v => v.classList.remove('active'));
+                const monthView = document.getElementById('month-view');
+                const weekView = document.getElementById('week-view');
+                const dayView = document.getElementById('day-view');
+                
+                if (monthView) monthView.classList.remove('active');
+                if (weekView) weekView.classList.remove('active');
+                if (dayView) dayView.classList.remove('active');
                 
                 // Показываем выбранный вид
-                document.getElementById(`${view}-view`).classList.add('active');
+                if (view === 'month' && monthView) monthView.classList.add('active');
+                if (view === 'week' && weekView) weekView.classList.add('active');
+                if (view === 'day' && dayView) dayView.classList.add('active');
                 
                 // Если выбран вид "День", показываем детали выбранного дня
                 if (view === 'day') {
@@ -296,18 +344,22 @@ class CalendarApp {
         });
         
         // Кнопка создания события
-        document.getElementById('create-event').addEventListener('click', () => {
-            const dateStr = this.selectedDate.toISOString().split('T')[0];
-            window.location.href = `index.html?date=${dateStr}`;
-        });
+        if (createEventBtn) {
+            createEventBtn.addEventListener('click', () => {
+                const dateStr = formatLocalDate(this.selectedDate);
+                window.location.href = `index.html?date=${dateStr}`;
+            });
+        }
     }
 
     showDayView() {
         const container = document.getElementById('day-calendar');
-        const dateStr = this.selectedDate.toISOString().split('T')[0];
+        if (!container) return;
+        
         const reminders = this.getRemindersForDate(this.selectedDate);
         
-        let html = `<h3>Расписание на ${this.selectedDate.toLocaleDateString('ru-RU')}</h3>`;
+        let html = `<h3>📅 Расписание на ${this.selectedDate.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</h3>`;
+        html += '<div class="day-schedule">';
         
         // Создаем расписание по часам
         for (let hour = 0; hour < 24; hour++) {
@@ -316,27 +368,34 @@ class CalendarApp {
                 return reminderHour === hour;
             });
             
+            const hourFormatted = hour.toString().padStart(2, '0');
+            
             html += `
                 <div class="hour-slot">
-                    <div class="hour-label">${hour.toString().padStart(2, '0')}:00</div>
+                    <div class="hour-label">🕐 ${hourFormatted}:00</div>
                     <div class="hour-content">
                         ${hourReminders.length > 0 ? 
                             hourReminders.map(r => `
-                                <div class="event-card ${r.priority}">
-                                    <div class="event-time">${r.time}</div>
-                                    <div class="event-info">
-                                        <div class="event-title">${r.title}</div>
-                                    </div>
+                                <div class="event-card ${r.priority}" style="margin: 5px 0; padding: 8px;">
+                                    <strong>${r.time}</strong> - ${this.escapeHtml(r.title)}
                                 </div>
                             `).join('') : 
-                            '<div class="no-events">Нет напоминаний</div>'
+                            '<div class="no-events" style="color: #999; padding: 5px;">— Нет дел —</div>'
                         }
                     </div>
                 </div>
             `;
         }
         
+        html += '</div>';
         container.innerHTML = html;
+    }
+    
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
