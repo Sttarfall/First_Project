@@ -60,6 +60,11 @@ def index():
     """Главная страница"""
     return render_template('index.html')
 
+@app.route('/index.html')
+def index_page():
+    """Главная страница"""
+    return render_template('index.html')
+
 @app.route('/stats.html')
 def stats_page():
     """Страница статистики"""
