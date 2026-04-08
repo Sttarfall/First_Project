@@ -154,7 +154,7 @@ class CalendarApp {
     }
 
     getRemindersForDate(date) {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = reminder.date;
         return this.reminders.filter(r => r.date === dateStr && !r.is_completed);
     }
 
