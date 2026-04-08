@@ -390,7 +390,7 @@ async function handleCreateReminder(e) {
     
     const reminder = {
         title: document.getElementById('title').value.trim(),
-        date: selectedDate,
+        date: document.getElementById('date').value,
         time: document.getElementById('time').value,
         description: document.getElementById('description').value.trim(),
         priority: document.getElementById('priority').value
