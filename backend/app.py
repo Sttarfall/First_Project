@@ -136,8 +136,8 @@ def create_reminder():
         print("=" * 50)
         print(f"📥 ПОЛУЧЕНО ОТ ФРОНТЕНДА:")
         print(f"   Заголовок: {data['title']}")
-        print(f"   Дата: {data['date']}")      # ← что приходит?
-        print(f"   Время: {data['time']}")     # ← что приходит?
+        print(f"   Дата: {data['date']}")      
+        print(f"   Время: {data['time']}")     
         print("=" * 50)
         
         local_tz = timezone(timedelta(hours=3))  # Для Москвы (+3)
