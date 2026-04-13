@@ -11,10 +11,7 @@ Python 3.11, Flask 2.3, BOOTSTRAP 5, HTML 5, CSS 3, JavaScript ES15, Sqllite3
 ```bash
 cd ~/first_project
 cd backend
-python -m venv venv
-venv\Scripts\activate
 pip install flask flask-cors flask-sqlalchemy
-pip install -r requirements.txt
 python app.py
 ```
 ## Тестовые данные
